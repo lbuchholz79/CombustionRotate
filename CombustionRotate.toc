@@ -19,7 +19,7 @@ libs\AceSerializer-3.0\AceSerializer-3.0.xml
 
 locales\enUS.lua
 
-src\tranqRotate.lua
+src\combRotate.lua
 src\events.lua
 src\rotation.lua
 src\constants.lua
