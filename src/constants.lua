@@ -1,4 +1,4 @@
-TranqRotate.colors = {
+CombRotate.colors = {
     ['green'] = CreateColor(0.67, 0.83, 0.45),
     ['darkGreen'] = CreateColor(0.1, 0.4, 0.1),
     ['blue'] = CreateColor(0.3, 0.3, 0.7),
@@ -8,42 +8,40 @@ TranqRotate.colors = {
     ['white'] = CreateColor(1,1,1),
 }
 
-TranqRotate.constants = {
-    ['hunterFrameHeight'] = 22,
-    ['hunterFrameSpacing'] = 4,
+CombRotate.constants = {
+    ['mageFrameHeight'] = 22,
+    ['mageFrameSpacing'] = 4,
     ['titleBarHeight'] = 18,
-    ['mainFrameWidth'] = 130,
+    ['mainFrameWidth'] = 150,
     ['rotationFramesBaseHeight'] = 20,
 
-    ['commsPrefix'] = 'tranqrotate',
+    ['commsPrefix'] = 'combrotate',
     ['commsChannel'] = 'RAID',
 
     ['commsTypes'] = {
-        ['tranqshotDone'] = 'tranqshot-done',
+        ['combDone'] = 'combustion-done',
         ['syncOrder'] = 'sync-order',
         ['syncRequest'] = 'sync-request',
         ['backupRequest'] = 'backup-request',
         ['reset'] = 'reset',
     },
 
-    ['printPrefix'] = 'TranqRotate - ',
-    ['duplicateTranqshotDelayThreshold'] = 10,
-    ['duplicateFailedTranqshotDelayThreshold'] = 10,
-
+    ['printPrefix'] = 'CombRotate - ',
+    ['duplicateCombustionDelayThreshold'] = 10,
     ['minimumCooldownElapsedForEligibility'] = 10,
 
     ['sounds'] = {
-        ['nextToTranq'] = 'Interface\\AddOns\\TranqRotate\\sounds\\ding.ogg',
+        ['nextToComb'] = 'Interface\\AddOns\\CombustionRotate\\sounds\\ding.ogg',
         ['alarms'] = {
-            ['alarm1'] = 'Interface\\AddOns\\TranqRotate\\sounds\\alarm.ogg',
-            ['alarm2'] = 'Interface\\AddOns\\TranqRotate\\sounds\\alarm2.ogg',
-            ['alarm3'] = 'Interface\\AddOns\\TranqRotate\\sounds\\alarm3.ogg',
-            ['alarm4'] = 'Interface\\AddOns\\TranqRotate\\sounds\\alarm4.ogg',
+            ['alarm1'] = 'Interface\\AddOns\\CombustionRotate\\sounds\\alarm.ogg',
+            ['alarm2'] = 'Interface\\AddOns\\CombustionRotate\\sounds\\alarm2.ogg',
+            ['alarm3'] = 'Interface\\AddOns\\CombustionRotate\\sounds\\alarm3.ogg',
+            ['alarm4'] = 'Interface\\AddOns\\CombustionRotate\\sounds\\alarm4.ogg',
             ['flagtaken'] = 'Sound\\Spells\\PVPFlagTaken.ogg',
         }
     },
 
-    ['tranqNowSounds'] = {
+    ['combNowSounds'] = {
         ['alarm1'] = 'Loud BUZZ',
         ['alarm2'] = 'Gentle beeplip',
         ['alarm3'] = 'Gentle dong',
@@ -52,26 +50,17 @@ TranqRotate.constants = {
     },
 
     ['bosses'] = {
-        [11982] = { -- magmadar
-            ['frenzy'] = 19451,
-            ['cooldown'] = 18,
-        },
-        [11981] = { -- flamegor
-            ['frenzy'] = 23342,
-            ['cooldown'] = 9,
-        },
-        [14020] = { -- chromaggus
-            ['frenzy'] = 23342,
-            ['cooldown'] = 16,
-        },
-        [15509] = { -- huhuran
-            ['frenzy'] = 19451,
-            ['cooldown'] = 13,
-        },
-        [15932] = { -- gluth
-            ['frenzy'] = 19451,
-            ['cooldown'] = 10,
-        },
+        9017,  -- Lord Incendius
+        11668, -- Firelord
+        11666, -- Firewalker
+        8909,  -- Fireguard
+        12056, -- Geddon
+        11502, -- Ragnaros
+        13020, -- Vaelastrasz
+        11983, -- Firemaw
+        11981, -- Flamegor
+        14601, -- Ebonroc
+        11583, -- Nefarian
     },
 
     ["incapacitatingDebuffs"] = {

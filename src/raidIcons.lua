@@ -1,6 +1,6 @@
-TranqRotate.chatIconString = "{rt%d}"
+CombRotate.chatIconString = "{rt%d}"
 
-TranqRotate.raidIconMaskToIndex = {
+CombRotate.raidIconMaskToIndex = {
     [COMBATLOG_OBJECT_RAIDTARGET1] = 1,
     [COMBATLOG_OBJECT_RAIDTARGET2] = 2,
     [COMBATLOG_OBJECT_RAIDTARGET3] = 3,
@@ -11,10 +11,10 @@ TranqRotate.raidIconMaskToIndex = {
     [COMBATLOG_OBJECT_RAIDTARGET8] = 8,
 }
 
-function TranqRotate:getRaidTargetIcon(flags)
+function CombRotate:getRaidTargetIcon(flags)
     local raidIconMask = bit.band(flags, COMBATLOG_OBJECT_RAIDTARGET_MASK)
-    if (TranqRotate.raidIconMaskToIndex[raidIconMask]) then
-        return string.format(TranqRotate.chatIconString, TranqRotate.raidIconMaskToIndex[raidIconMask])
+    if (CombRotate.raidIconMaskToIndex[raidIconMask]) then
+        return string.format(CombRotate.chatIconString, CombRotate.raidIconMaskToIndex[raidIconMask])
     end
 
     return ""

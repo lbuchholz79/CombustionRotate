@@ -1,80 +1,80 @@
--- Enable drag & drop for all hunter frames
-function TranqRotate:toggleListSorting(allowSorting)
-    for key,hunter in pairs(TranqRotate.hunterTable) do
-        TranqRotate:toggleHunterFrameDragging(hunter, allowSorting)
+-- Enable drag & drop for all mage frames
+function CombRotate:toggleListSorting(allowSorting)
+    for key, mage in pairs(CombRotate.mageTable) do
+        CombRotate:toggleMageFrameDragging(mage, allowSorting)
     end
 end
 
--- Enable or disable drag & drop for the hunter frame
-function TranqRotate:toggleHunterFrameDragging(hunter, allowSorting)
-    hunter.frame:EnableMouse(allowSorting)
-    hunter.frame:SetMovable(allowSorting)
+-- Enable or disable drag & drop for the mage frame
+function CombRotate:toggleMageFrameDragging(mage, allowSorting)
+    mage.frame:EnableMouse(allowSorting)
+    mage.frame:SetMovable(allowSorting)
 end
 
--- configure hunter frame drag behavior
-function TranqRotate:configureHunterFrameDrag(hunter)
+-- configure mage frame drag behavior
+function CombRotate:configureMageFrameDrag(mage)
 
-    hunter.frame:RegisterForDrag("LeftButton")
-    hunter.frame:SetClampedToScreen(true)
+    mage.frame:RegisterForDrag("LeftButton")
+    mage.frame:SetClampedToScreen(true)
 
-    hunter.frame.blindIconFrame:RegisterForDrag("LeftButton")
-    hunter.frame.blindIconFrame:SetClampedToScreen(true)
+    mage.frame.blindIconFrame:RegisterForDrag("LeftButton")
+    mage.frame.blindIconFrame:SetClampedToScreen(true)
 
-    hunter.frame:SetScript(
+    mage.frame:SetScript(
         "OnDragStart",
         function()
-            hunter.frame:StartMoving()
-            hunter.frame:SetFrameStrata("HIGH")
+            mage.frame:StartMoving()
+            mage.frame:SetFrameStrata("HIGH")
 
-            hunter.frame:SetScript(
+            mage.frame:SetScript(
                 "OnUpdate",
                 function ()
-                    TranqRotate:setDropHintPosition(hunter.frame)
+                    CombRotate:setDropHintPosition(mage.frame)
                 end
             )
 
-            TranqRotate.mainFrame.dropHintFrame:Show()
-            TranqRotate.mainFrame.backupFrame:Show()
+            CombRotate.mainFrame.dropHintFrame:Show()
+            CombRotate.mainFrame.backupFrame:Show()
         end
     )
 
-    hunter.frame:SetScript(
+    mage.frame:SetScript(
         "OnDragStop",
         function()
-            hunter.frame:StopMovingOrSizing()
-            hunter.frame:SetFrameStrata(TranqRotate.mainFrame:GetFrameStrata())
-            TranqRotate.mainFrame.dropHintFrame:Hide()
+            mage.frame:StopMovingOrSizing()
+            mage.frame:SetFrameStrata(CombRotate.mainFrame:GetFrameStrata())
+            CombRotate.mainFrame.dropHintFrame:Hide()
 
             -- Removes the OnUpdate event used for drag & drop
-            hunter.frame:SetScript("OnUpdate", nil)
+            mage.frame:SetScript("OnUpdate", nil)
 
-            if (#TranqRotate.rotationTables.backup < 1) then
-                TranqRotate.mainFrame.backupFrame:Hide()
+            if (#CombRotate.rotationTables.backup < 1) then
+                CombRotate.mainFrame.backupFrame:Hide()
             end
 
-            local group, position = TranqRotate:getDropPosition(hunter.frame)
-            TranqRotate:handleDrop(hunter, group, position)
-            TranqRotate:sendSyncOrder(false)
+            local group, position = CombRotate:getDropPosition(mage.frame)
+            CombRotate:handleDrop(mage, group, position)
+            CombRotate:sendSyncOrder(false)
         end
     )
 end
 
--- returns the difference between the top of the rotation frame and the dragged hunter frame
-function TranqRotate:getDragFrameHeight(hunterFrame)
-    return math.abs(hunterFrame:GetTop() - TranqRotate.mainFrame.rotationFrame:GetTop())
+-- returns the difference between the top of the rotation frame and the dragged mage frame
+function CombRotate:getDragFrameHeight(mageFrame)
+    return math.abs(mageFrame:GetTop() - CombRotate.mainFrame.rotationFrame:GetTop())
 end
 
 -- create and initialize the drop hint frame
-function TranqRotate:createDropHintFrame()
+function CombRotate:createDropHintFrame()
 
-    local hintFrame = CreateFrame("Frame", nil, TranqRotate.mainFrame.rotationFrame)
+    local hintFrame = CreateFrame("Frame", nil, CombRotate.mainFrame.rotationFrame)
 
-    hintFrame:SetPoint('TOP', TranqRotate.mainFrame.rotationFrame, 'TOP', 0, 0)
-    hintFrame:SetHeight(TranqRotate.constants.hunterFrameHeight)
-    hintFrame:SetWidth(TranqRotate.constants.mainFrameWidth - 10)
+    hintFrame:SetPoint('TOP', CombRotate.mainFrame.rotationFrame, 'TOP', 0, 0)
+    hintFrame:SetHeight(CombRotate.constants.mageFrameHeight)
+    hintFrame:SetWidth(CombRotate.constants.mainFrameWidth - 10)
 
     hintFrame.texture = hintFrame:CreateTexture(nil, "BACKGROUND")
-    hintFrame.texture:SetColorTexture(TranqRotate.colors.white:GetRGB())
+    hintFrame.texture:SetColorTexture(CombRotate.colors.white:GetRGB())
     hintFrame.texture:SetAlpha(0.7)
     hintFrame.texture:SetPoint('LEFT')
     hintFrame.texture:SetPoint('RIGHT')
@@ -82,67 +82,67 @@ function TranqRotate:createDropHintFrame()
 
     hintFrame:Hide()
 
-    TranqRotate.mainFrame.dropHintFrame = hintFrame
+    CombRotate.mainFrame.dropHintFrame = hintFrame
 end
 
 -- Set the drop hint frame position to match dragged frame position
-function TranqRotate:setDropHintPosition(hunterFrame)
+function CombRotate:setDropHintPosition(mageFrame)
 
-    local hunterFrameHeight = TranqRotate.constants.hunterFrameHeight
-    local hunterFrameSpacing = TranqRotate.constants.hunterFrameSpacing
+    local mageFrameHeight = CombRotate.constants.mageFrameHeight
+    local mageFrameSpacing = CombRotate.constants.mageFrameSpacing
     local hintPosition = 0
 
-    local group, position = TranqRotate:getDropPosition(hunterFrame)
+    local group, position = CombRotate:getDropPosition(mageFrame)
 
     if (group == 'ROTATION') then
         if (position == 0) then
             hintPosition = -2
         else
-            hintPosition = (position) * (hunterFrameHeight + hunterFrameSpacing) - hunterFrameSpacing / 2;
+            hintPosition = (position) * (mageFrameHeight + mageFrameSpacing) - mageFrameSpacing / 2;
         end
     else
-        hintPosition = TranqRotate.mainFrame.rotationFrame:GetHeight()
+        hintPosition = CombRotate.mainFrame.rotationFrame:GetHeight()
 
         if (position == 0) then
             hintPosition = hintPosition - 2
         else
-            hintPosition = hintPosition + (position) * (hunterFrameHeight + hunterFrameSpacing) - hunterFrameSpacing / 2;
+            hintPosition = hintPosition + (position) * (mageFrameHeight + mageFrameSpacing) - mageFrameSpacing / 2;
         end
     end
 
-    TranqRotate.mainFrame.dropHintFrame:SetPoint('TOP', 0 , -hintPosition)
+    CombRotate.mainFrame.dropHintFrame:SetPoint('TOP', 0 , -hintPosition)
 end
 
 -- Compute drop group and position from ruler height
-function TranqRotate:getDropPosition(hunterFrame)
+function CombRotate:getDropPosition(mageFrame)
 
-    local height = TranqRotate:getDragFrameHeight(hunterFrame)
+    local height = CombRotate:getDragFrameHeight(mageFrame)
     local group = 'ROTATION'
     local position = 0
 
-    local hunterFrameHeight = TranqRotate.constants.hunterFrameHeight
-    local hunterFrameSpacing = TranqRotate.constants.hunterFrameSpacing
+    local mageFrameHeight = CombRotate.constants.mageFrameHeight
+    local mageFrameSpacing = CombRotate.constants.mageFrameSpacing
 
     -- Dragged frame is above rotation frames
-    if (hunterFrame:GetTop() > TranqRotate.mainFrame.rotationFrame:GetTop()) then
+    if (mageFrame:GetTop() > CombRotate.mainFrame.rotationFrame:GetTop()) then
         height = 0
     end
 
-    position = floor(height / (hunterFrameHeight + hunterFrameSpacing))
+    position = floor(height / (mageFrameHeight + mageFrameSpacing))
 
     -- Dragged frame is bellow rotation frame
-    if (height > TranqRotate.mainFrame.rotationFrame:GetHeight()) then
+    if (height > CombRotate.mainFrame.rotationFrame:GetHeight()) then
 
         group = 'BACKUP'
 
         -- Removing rotation frame size from calculation, using it's height as base hintPosition offset
-        height = height - TranqRotate.mainFrame.rotationFrame:GetHeight()
+        height = height - CombRotate.mainFrame.rotationFrame:GetHeight()
 
-        if (height > TranqRotate.mainFrame.backupFrame:GetHeight()) then
+        if (height > CombRotate.mainFrame.backupFrame:GetHeight()) then
             -- Dragged frame is bellow backup frame
-            position = #TranqRotate.rotationTables.backup
+            position = #CombRotate.rotationTables.backup
         else
-            position = floor(height / (hunterFrameHeight + hunterFrameSpacing))
+            position = floor(height / (mageFrameHeight + mageFrameSpacing))
         end
     end
 
@@ -150,16 +150,16 @@ function TranqRotate:getDropPosition(hunterFrame)
 end
 
 -- Compute the table final position from the drop position
-function TranqRotate:handleDrop(hunter, group, position)
+function CombRotate:handleDrop(mage, group, position)
 
-    local originTable = TranqRotate:getHunterRotationTable(hunter)
-    local originIndex = TranqRotate:getHunterIndex(hunter, originTable)
+    local originTable = CombRotate:getMageRotationTable(mage)
+    local originIndex = CombRotate:getMageIndex(mage, originTable)
 
-    local destinationTable = TranqRotate.rotationTables.rotation
+    local destinationTable = CombRotate.rotationTables.rotation
     local finalPosition = 1
 
     if (group == "BACKUP") then
-        destinationTable = TranqRotate.rotationTables.backup
+        destinationTable = CombRotate.rotationTables.backup
     end
 
     if (destinationTable == originTable) then
@@ -178,10 +178,10 @@ function TranqRotate:handleDrop(hunter, group, position)
         finalPosition = position + 1
     end
 
-    TranqRotate:moveHunter(hunter, group, finalPosition)
+    CombRotate:moveMage(mage, group, finalPosition)
 end
 
 -- Update drag and drop status to match player status
-function TranqRotate:updateDragAndDrop()
-    TranqRotate:toggleListSorting(TranqRotate:isPlayerAllowedToManageRotation())
+function CombRotate:updateDragAndDrop()
+    CombRotate:toggleListSorting(CombRotate:isPlayerAllowedToManageRotation())
 end

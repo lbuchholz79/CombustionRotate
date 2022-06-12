@@ -1,5 +1,5 @@
 -- Check if a table contains the given element
-function TranqRotate:tableContains(table, element)
+function CombRotate:tableContains(table, element)
 
     for _, value in pairs(table) do
         if value == element then
@@ -10,45 +10,45 @@ function TranqRotate:tableContains(table, element)
     return false
 end
 
--- Checks if a hunter is alive
-function TranqRotate:isHunterAlive(hunter)
-    return UnitIsFeignDeath(hunter.name) or not UnitIsDeadOrGhost(hunter.name)
+-- Checks if a mage is alive
+function CombRotate:isMageAlive(mage)
+    return UnitIsFeignDeath(mage.name) or not UnitIsDeadOrGhost(mage.name)
 end
 
--- Checks if a hunter is offline
-function TranqRotate:isHunterOnline(hunter)
-    return UnitIsConnected(hunter.name)
+-- Checks if a mage is offline
+function CombRotate:isMageOnline(mage)
+    return UnitIsConnected(mage.name)
 end
 
--- Checks if a hunter is online and alive
-function TranqRotate:isHunterAliveAndOnline(hunter)
-    return TranqRotate:isHunterOnline(hunter) and TranqRotate:isHunterAlive(hunter)
+-- Checks if a mage is online and alive
+function CombRotate:isMageAliveAndOnline(mage)
+    return CombRotate:isMageOnline(mage) and CombRotate:isMageAlive(mage)
 end
 
--- Checks if a hunter tranqshot is ready
-function TranqRotate:isHunterTranqCooldownReady(hunter)
-    return hunter.lastTranqTime <= GetTime() - 20
+-- Checks if a mage combustion is ready
+function CombRotate:isMageCombustionCooldownReady(mage)
+    return mage.lastCombTime <= GetTime() - 180
 end
 
--- Checks if a hunter is eligible to tranq next
-function TranqRotate:isEligibleForNextTranq(hunter)
+-- Checks if a mage is eligible to combustion next
+function CombRotate:isEligibleForNextComb(mage)
 
-    local isCooldownShortEnough = hunter.lastTranqTime <= GetTime() - TranqRotate.constants.minimumCooldownElapsedForEligibility
+    local isCooldownShortEnough = mage.lastCombTime <= GetTime() - CombRotate.constants.minimumCooldownElapsedForEligibility
 
-    return TranqRotate:isHunterAliveAndOnline(hunter) and isCooldownShortEnough
+    return CombRotate:isMageAliveAndOnline(mage) and isCooldownShortEnough
 end
 
--- Checks if a hunter is in a battleground
-function TranqRotate:isPlayerInBattleground()
+-- Checks if a mage is in a battleground
+function CombRotate:isPlayerInBattleground()
     return UnitInBattleground('player') ~= nil
 end
 
--- Checks if a hunter is in a PvE raid
-function TranqRotate:isInPveRaid()
-    return IsInRaid() and not TranqRotate:isPlayerInBattleground()
+-- Checks if a mage is in a PvE raid
+function CombRotate:isInPveRaid()
+    return IsInRaid() and not CombRotate:isPlayerInBattleground()
 end
 
-function TranqRotate:getPlayerNameFont()
+function CombRotate:getPlayerNameFont()
     local locale = GetLocale()
     if (locale == "zhCN" or locale == "zhTW") then
         return "Fonts\\ARHei.ttf"
@@ -59,20 +59,20 @@ function TranqRotate:getPlayerNameFont()
     return "Fonts\\ARIALN.ttf"
 end
 
-function TranqRotate:getIdFromGuid(guid)
+function CombRotate:getIdFromGuid(guid)
     local type, _, _, _, _, mobId, _ = strsplit("-", guid or "")
     return type, tonumber(mobId)
 end
 
--- Checks if the spell and the mob match a boss frenzy
-function TranqRotate:isBossFrenzy(spellName, guid)
+-- Checks if the mob is a fire immune boss
+function CombRotate:isBossFireImmune(guid)
 
-    local bosses = TranqRotate.constants.bosses
-    local type, mobId = TranqRotate:getIdFromGuid(guid)
+    local bosses = CombRotate.constants.bosses
+    local type, mobId = CombRotate:getIdFromGuid(guid)
 
     if (type == "Creature") then
-        for bossId, bossData in pairs(bosses) do
-            if (bossId == mobId and spellName == GetSpellInfo(bossData.frenzy)) then
+        for i, bossId in ipairs(bosses) do
+            if (bossId ~= mobId) then
                 return true
             end
         end
@@ -81,46 +81,15 @@ function TranqRotate:isBossFrenzy(spellName, guid)
     return false
 end
 
--- Checks if the mob is a tranq-able boss
-function TranqRotate:isTranqableBoss(guid)
-
-    local bosses = TranqRotate.constants.bosses
-    local type, mobId = TranqRotate:getIdFromGuid(guid)
-
-    if (type == "Creature") then
-        for bossId, bossData in pairs(bosses) do
-            if (bossId == mobId) then
-                return true
-            end
-        end
-    end
-
-    return false
-end
-
--- Checks if the spell is a boss frenzy
-function TranqRotate:isFrenzy(spellName)
-
-    local bosses = TranqRotate.constants.bosses
-
-    for bossId, bossData in pairs(bosses) do
-        if (spellName == GetSpellInfo(bossData.frenzy)) then
-            return true
-        end
-    end
-
-    return false
-end
-
--- Checks if the player is a hunter
-function TranqRotate:isHunter(name)
-    return select(2,UnitClass(name)) == 'HUNTER'
+-- Checks if the player is a mage
+function CombRotate:isMage(name)
+    return select(2,UnitClass(name)) == 'MAGE'
 end
 
 -- Check if unit is promoted (raid assist or raid leader)
-function TranqRotate:isPlayerRaidAssist(name)
+function CombRotate:isPlayerRaidAssist(name)
 
-    if (TranqRotate:isInPveRaid()) then
+    if (CombRotate:isInPveRaid()) then
 
         local raidIndex = UnitInRaid(name)
 
@@ -137,27 +106,27 @@ function TranqRotate:isPlayerRaidAssist(name)
 end
 
 -- Checks if player is allowed to manage rotation
-function TranqRotate:isPlayerAllowedToManageRotation()
+function CombRotate:isPlayerAllowedToManageRotation()
     local playerName = UnitName("player")
-    return TranqRotate:isUnitAllowedToManageRotation(playerName)
+    return CombRotate:isUnitAllowedToManageRotation(playerName)
 end
 
 -- Checks if unit is allowed to manage rotation
-function TranqRotate:isUnitAllowedToManageRotation(unitName)
-    return TranqRotate:isHunter(unitName) or TranqRotate:isPlayerRaidAssist(unitName)
+function CombRotate:isUnitAllowedToManageRotation(unitName)
+    return CombRotate:isMage(unitName) or CombRotate:isPlayerRaidAssist(unitName)
 end
 
 -- Format the player name and server suffix
-function TranqRotate:formatPlayerName(fullName)
+function CombRotate:formatPlayerName(fullName)
 
     local displayName = fullName
 
-    if (TranqRotate.constants.playerNameFormats.SHORT == TranqRotate.db.profile.playerNameFormatting) then
+    if (CombRotate.constants.playerNameFormats.SHORT == CombRotate.db.profile.playerNameFormatting) then
         local dashIndex = strfind(fullName, "-")
         if (nil ~= dashIndex) then
             displayName = strsub(fullName, 1, dashIndex + 3)
         end
-    elseif (TranqRotate.constants.playerNameFormats.PLAYER_NAME_ONLY == TranqRotate.db.profile.playerNameFormatting) then
+    elseif (CombRotate.constants.playerNameFormats.PLAYER_NAME_ONLY == CombRotate.db.profile.playerNameFormatting) then
         displayName = strsplit("-", fullName)
     end
 

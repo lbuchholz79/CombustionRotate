@@ -1,5 +1,5 @@
-local tranqShot = GetSpellInfo(19801)
-local arcaneShot = GetSpellInfo(14287)
+local combustion = GetSpellInfo(11129)
+local fireBlast = GetSpellInfo(10199)
 
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
@@ -13,134 +13,112 @@ eventFrame:SetScript(
     "OnEvent",
     function(self, event, ...)
         if (event == "PLAYER_LOGIN") then
-            TranqRotate:init()
+            CombRotate:init()
             self:UnregisterEvent("PLAYER_LOGIN")
 
             -- Delayed raid update because raid data is unreliable at PLAYER_LOGIN
             C_Timer.After(5, function()
-                TranqRotate:updateRaidStatus()
+                CombRotate:updateRaidStatus()
             end)
         else
-            TranqRotate[event](TranqRotate, ...)
+            CombRotate[event](CombRotate, ...)
         end
     end
 )
 
-function TranqRotate:COMBAT_LOG_EVENT_UNFILTERED()
+function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
 
     -- @todo : Improve this with register / unregister event to save resources
     -- Avoid parsing combat log when not able to use it
-    if (not TranqRotate.raidInitialized) then return end
+    if (not CombRotate.raidInitialized) then return end
     -- Avoid parsing combat log when outside instance if test mode isn't enabled
-    if (not TranqRotate.testMode and not IsInInstance()) then return end
+    if (not CombRotate.testMode and not IsInInstance()) then return end
 
     local timestamp, event, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
     local spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, CombatLogGetCurrentEventInfo())
 
-    if (spellName == tranqShot or (TranqRotate.testMode and spellName == arcaneShot)) then
-        local hunter = TranqRotate:getHunter(sourceGUID)
-        if (hunter) then
+    if (spellName == combustion or (CombRotate.testMode and spellName == fireBlast)) then
+        local mage = CombRotate:getMage(sourceGUID)
+        if (mage) then
             if (event == "SPELL_CAST_SUCCESS") then
-                TranqRotate:sendSyncTranq(hunter, false, timestamp)
-                TranqRotate:rotate(hunter)
+                CombRotate:sendSyncComb(mage, false, timestamp)
+                CombRotate:rotate(mage)
                 if  (sourceGUID == UnitGUID("player")) then
-                    TranqRotate:sendAnnounceMessage(
-                        TranqRotate:getTranqSuccessMessage(
-                            TranqRotate:isTranqableBoss(destGUID),
+                    CombRotate:sendAnnounceMessage(
+                        CombRotate:getCombSuccessMessage(
                             destName,
                             destRaidFlags
                         )
                     )
                 end
-            elseif (event == "SPELL_MISSED" or event == "SPELL_DISPEL_FAILED") then
-                TranqRotate:sendSyncTranq(hunter, true, timestamp, event)
-                TranqRotate:handleFailTranq(hunter, event)
+            elseif (CombRotate:isBossFireImmune(UnitGUID("target"))) then
+                CombRotate:sendSyncComb(mage, true, timestamp, event)
                 if  (sourceGUID == UnitGUID("player")) then
-                    TranqRotate:sendAnnounceMessage(TranqRotate:getTranqFailMessage(destName, destRaidFlags))
+                    CombRotate:sendAnnounceMessage(CombRotate:getCombImmuneMessage(destName, destRaidFlags))
                 end
             end
         end
-    elseif (event == "SPELL_AURA_APPLIED" and TranqRotate:isBossFrenzy(spellName, sourceGUID)) then
-        TranqRotate.frenzy = true
-        if (TranqRotate:isPlayerNextTranq()) then
-            TranqRotate:handleTimedAlert()
-            TranqRotate:throwTranqAlert()
+    elseif (event == "SPELL_AURA_APPLIED" and not CombRotate:isBossFireImmune(sourceGUID)) then
+        if (CombRotate:isPlayerNextComb()) then
+            CombRotate:throwCombAlert()
 
-            if (TranqRotate.db.profile.enableIncapacitatedBackupAlert and TranqRotate:isPlayedIncapacitatedByDebuff()) then
-                TranqRotate:alertBackup(TranqRotate.db.profile.unableToTranqMessage)
+            if (CombRotate.db.profile.enableIncapacitatedBackupAlert and CombRotate:isPlayedIncapacitatedByDebuff()) then
+                CombRotate:alertBackup(CombRotate.db.profile.unableToCombMessage)
             end
         end
-        if(TranqRotate.db.profile.showFrenzyCooldownProgress) then
-            local type, id = TranqRotate:getIdFromGuid(sourceGUID)
-            TranqRotate:startBossFrenzyCooldown(TranqRotate.constants.bosses[id].cooldown)
+    elseif (event == "UNIT_DIED" and not CombRotate:isBossFireImmune(destGUID)) then
+        if (CombRotate:isPlayerAllowedToManageRotation()) then
+            CombRotate:endEncounter()
         end
-    elseif (event == "SPELL_AURA_REMOVED" and TranqRotate:isBossFrenzy(spellName, sourceGUID)) then
-        TranqRotate.frenzy = false
-    elseif (event == "UNIT_DIED" and TranqRotate:isTranqableBoss(destGUID)) then
-        if (TranqRotate:isPlayerAllowedToManageRotation()) then
-            TranqRotate:endEncounter()
-        end
-        TranqRotate.mainFrame.frenzyFrame:Hide()
     end
 end
 
 -- Raid group has changed
-function TranqRotate:GROUP_ROSTER_UPDATE()
-    TranqRotate:updateRaidStatus()
+function CombRotate:GROUP_ROSTER_UPDATE()
+    CombRotate:updateRaidStatus()
 end
 
 -- Player left combat
-function TranqRotate:PLAYER_REGEN_ENABLED()
-    TranqRotate:updateRaidStatus()
+function CombRotate:PLAYER_REGEN_ENABLED()
+    CombRotate:updateRaidStatus()
 end
 
 -- Player left combat
-function TranqRotate:ENCOUNTER_END()
-    TranqRotate.endEncounter()
+function CombRotate:ENCOUNTER_END()
+    CombRotate.endEncounter()
 end
 
-function TranqRotate:PLAYER_TARGET_CHANGED()
-    if (TranqRotate.db.profile.showWindowWhenTargetingBoss) then
-        if (TranqRotate:isTranqableBoss(UnitGUID("target")) and not UnitIsDead("target")) then
-            TranqRotate.mainFrame:Show()
+function CombRotate:PLAYER_TARGET_CHANGED()
+    if (CombRotate.db.profile.showWindowWhenTargetingBoss) then
+        if (not CombRotate:isBossFireImmune(UnitGUID("target")) and not UnitIsDead("target")) then
+            CombRotate.mainFrame:Show()
         end
     end
 end
 
--- Register single unit events for a given hunter
-function TranqRotate:registerUnitEvents(hunter)
+-- Register single unit events for a given mage
+function CombRotate:registerUnitEvents(mage)
 
-    hunter.frame:RegisterUnitEvent("PARTY_MEMBER_DISABLE", hunter.name)
-    hunter.frame:RegisterUnitEvent("PARTY_MEMBER_ENABLE", hunter.name)
-    hunter.frame:RegisterUnitEvent("UNIT_HEALTH", hunter.name)
-    hunter.frame:RegisterUnitEvent("UNIT_CONNECTION", hunter.name)
-    hunter.frame:RegisterUnitEvent("UNIT_FLAGS", hunter.name)
+    mage.frame:RegisterUnitEvent("PARTY_MEMBER_DISABLE", mage.name)
+    mage.frame:RegisterUnitEvent("PARTY_MEMBER_ENABLE", mage.name)
+    mage.frame:RegisterUnitEvent("UNIT_HEALTH", mage.name)
+    mage.frame:RegisterUnitEvent("UNIT_CONNECTION", mage.name)
+    mage.frame:RegisterUnitEvent("UNIT_FLAGS", mage.name)
 
-    hunter.frame:SetScript(
+    mage.frame:SetScript(
         "OnEvent",
         function(self, event, ...)
-            TranqRotate:updateHunterStatus(hunter)
+            CombRotate:updateMageStatus(mage)
         end
     )
 
 end
 
--- Unregister single unit events for a given hunter
-function TranqRotate:unregisterUnitEvents(hunter)
-    hunter.frame:UnregisterEvent("PARTY_MEMBER_DISABLE")
-    hunter.frame:UnregisterEvent("PARTY_MEMBER_ENABLE")
-    hunter.frame:UnregisterEvent("UNIT_HEALTH_FREQUENT")
-    hunter.frame:UnregisterEvent("UNIT_CONNECTION")
-    hunter.frame:UnregisterEvent("UNIT_FLAGS")
-end
-
--- Handle timed alert for non tranqed frenzy
-function TranqRotate:handleTimedAlert()
-    if (TranqRotate.db.profile.enableTimedBackupAlert) then
-        C_Timer.After(TranqRotate.db.profile.timedBackupAlertDelay, function()
-            if (TranqRotate.frenzy and TranqRotate:isPlayerNextTranq()) then
-                TranqRotate:alertBackup(TranqRotate.db.profile.unableToTranqMessage)
-            end
-        end)
-    end
+-- Unregister single unit events for a given mage
+function CombRotate:unregisterUnitEvents(mage)
+    mage.frame:UnregisterEvent("PARTY_MEMBER_DISABLE")
+    mage.frame:UnregisterEvent("PARTY_MEMBER_ENABLE")
+    mage.frame:UnregisterEvent("UNIT_HEALTH_FREQUENT")
+    mage.frame:UnregisterEvent("UNIT_CONNECTION")
+    mage.frame:UnregisterEvent("UNIT_FLAGS")
 end

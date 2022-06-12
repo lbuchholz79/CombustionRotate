@@ -1,4 +1,4 @@
-function TranqRotate:endEncounter()
-    TranqRotate:resetRotation()
-    TranqRotate:sendResetBroadcast()
+function CombRotate:endEncounter()
+    CombRotate:resetRotation()
+    CombRotate:sendResetBroadcast()
 end

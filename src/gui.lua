@@ -1,183 +1,167 @@
-local L = TranqRotate.L
+local L = CombRotate.L
 
 -- Initialize GUI frames. Shouldn't be called more than once
-function TranqRotate:initGui()
+function CombRotate:initGui()
 
-    TranqRotate:createMainFrame()
-    TranqRotate:createTitleFrame()
-    TranqRotate:createButtons()
-    TranqRotate:createRotationFrame()
-    TranqRotate:createBackupFrame()
-    TranqRotate:createFrenzyFrame()
+    CombRotate:createMainFrame()
+    CombRotate:createTitleFrame()
+    CombRotate:createButtons()
+    CombRotate:createRotationFrame()
+    CombRotate:createBackupFrame()
 
-    TranqRotate:drawHunterFrames()
-    TranqRotate:createDropHintFrame()
+    CombRotate:drawMageFrames()
+    CombRotate:createDropHintFrame()
 
-    TranqRotate:updateDisplay()
+    CombRotate:updateDisplay()
 end
 
 -- Show/Hide main window based on user settings
-function TranqRotate:updateDisplay()
+function CombRotate:updateDisplay()
 
-    if (not TranqRotate.db.profile.doNotShowWindowOnRaidJoin and TranqRotate:isInPveRaid()) then
-        TranqRotate.mainFrame:Show()
+    if (not CombRotate.db.profile.doNotShowWindowOnRaidJoin and CombRotate:isInPveRaid()) then
+        CombRotate.mainFrame:Show()
     else
-        if (TranqRotate.db.profile.hideNotInRaid) then
-            TranqRotate.mainFrame:Hide()
+        if (CombRotate.db.profile.hideNotInRaid) then
+            CombRotate.mainFrame:Hide()
         end
     end
 end
 
--- render / re-render hunter frames to reflect table changes.
-function TranqRotate:drawHunterFrames()
+-- render / re-render mage frames to reflect table changes.
+function CombRotate:drawMageFrames()
 
     -- Different height to reduce spacing between both groups
-    TranqRotate.mainFrame:SetHeight(TranqRotate.constants.rotationFramesBaseHeight + TranqRotate.constants.titleBarHeight)
-    TranqRotate.mainFrame.rotationFrame:SetHeight(TranqRotate.constants.rotationFramesBaseHeight)
+    CombRotate.mainFrame:SetHeight(CombRotate.constants.rotationFramesBaseHeight + CombRotate.constants.titleBarHeight)
+    CombRotate.mainFrame.rotationFrame:SetHeight(CombRotate.constants.rotationFramesBaseHeight)
 
-    TranqRotate:drawList(TranqRotate.rotationTables.rotation, TranqRotate.mainFrame.rotationFrame)
+    CombRotate:drawList(CombRotate.rotationTables.rotation, CombRotate.mainFrame.rotationFrame)
 
-    if (#TranqRotate.rotationTables.backup > 0) then
-        TranqRotate.mainFrame:SetHeight(TranqRotate.mainFrame:GetHeight() + TranqRotate.constants.rotationFramesBaseHeight)
+    if (#CombRotate.rotationTables.backup > 0) then
+        CombRotate.mainFrame:SetHeight(CombRotate.mainFrame:GetHeight() + CombRotate.constants.rotationFramesBaseHeight)
     end
 
-    TranqRotate.mainFrame.backupFrame:SetHeight(TranqRotate.constants.rotationFramesBaseHeight)
-    TranqRotate:drawList(TranqRotate.rotationTables.backup, TranqRotate.mainFrame.backupFrame)
+    CombRotate.mainFrame.backupFrame:SetHeight(CombRotate.constants.rotationFramesBaseHeight)
+    CombRotate:drawList(CombRotate.rotationTables.backup, CombRotate.mainFrame.backupFrame)
 
 end
 
--- Handle the render of a single hunter frames group
-function TranqRotate:drawList(hunterList, parentFrame)
+-- Handle the render of a single mage frames group
+function CombRotate:drawList(mageList, parentFrame)
 
     local index = 1
-    local hunterFrameHeight = TranqRotate.constants.hunterFrameHeight
-    local hunterFrameSpacing = TranqRotate.constants.hunterFrameSpacing
+    local mageFrameHeight = CombRotate.constants.mageFrameHeight
+    local mageFrameSpacing = CombRotate.constants.mageFrameSpacing
 
-    if (#hunterList < 1 and parentFrame == TranqRotate.mainFrame.backupFrame) then
+    if (#mageList < 1 and parentFrame == CombRotate.mainFrame.backupFrame) then
         parentFrame:Hide()
     else
         parentFrame:Show()
     end
 
-    for key, hunter in pairs(hunterList) do
+    for key, mage in pairs(mageList) do
 
         -- Using existing frame if possible
-        if (hunter.frame == nil) then
-            TranqRotate:createHunterFrame(hunter, parentFrame)
+        if (mage.frame == nil) then
+            CombRotate:createMageFrame(mage, parentFrame)
         else
-            hunter.frame:SetParent(parentFrame)
-            hunter.frame.text:SetText(TranqRotate:formatPlayerName(hunter.name))
+            mage.frame:SetParent(parentFrame)
+            mage.frame.text:SetText(CombRotate:formatPlayerName(mage.name))
         end
 
-        hunter.frame:ClearAllPoints()
-        hunter.frame:SetPoint('LEFT', 10, 0)
-        hunter.frame:SetPoint('RIGHT', -10, 0)
+        mage.frame:ClearAllPoints()
+        mage.frame:SetPoint('LEFT', 10, 0)
+        mage.frame:SetPoint('RIGHT', -10, 0)
 
         -- Setting top margin
-        local marginTop = 10 + (index - 1) * (hunterFrameHeight + hunterFrameSpacing)
-        hunter.frame:SetPoint('TOP', parentFrame, 'TOP', 0, -marginTop)
+        local marginTop = 10 + (index - 1) * (mageFrameHeight + mageFrameSpacing)
+        mage.frame:SetPoint('TOP', parentFrame, 'TOP', 0, -marginTop)
 
         -- Handling parent windows height increase
         if (index == 1) then
-            parentFrame:SetHeight(parentFrame:GetHeight() + hunterFrameHeight)
-            TranqRotate.mainFrame:SetHeight(TranqRotate.mainFrame:GetHeight() + hunterFrameHeight)
+            parentFrame:SetHeight(parentFrame:GetHeight() + mageFrameHeight)
+            CombRotate.mainFrame:SetHeight(CombRotate.mainFrame:GetHeight() + mageFrameHeight)
         else
-            parentFrame:SetHeight(parentFrame:GetHeight() + hunterFrameHeight + hunterFrameSpacing)
-            TranqRotate.mainFrame:SetHeight(TranqRotate.mainFrame:GetHeight() + hunterFrameHeight + hunterFrameSpacing)
+            parentFrame:SetHeight(parentFrame:GetHeight() + mageFrameHeight + mageFrameSpacing)
+            CombRotate.mainFrame:SetHeight(CombRotate.mainFrame:GetHeight() + mageFrameHeight + mageFrameSpacing)
         end
 
         -- SetColor
-        TranqRotate:setHunterFrameColor(hunter)
+        CombRotate:setMageFrameColor(mage)
         -- Update blind version icon
-        TranqRotate:updateBlindIcon(hunter)
+        CombRotate:updateBlindIcon(mage)
 
-        hunter.frame:Show()
-        hunter.frame.hunter = hunter
+        mage.frame:Show()
+        mage.frame.mage = mage
 
         index = index + 1
     end
 end
 
--- Hide the hunter frame
-function TranqRotate:hideHunter(hunter)
-    if (hunter.frame ~= nil) then
-        hunter.frame:Hide()
+-- Hide the mage frame
+function CombRotate:hideMage(mage)
+    if (mage.frame ~= nil) then
+        mage.frame:Hide()
     end
 end
 
--- Refresh a single hunter frame
-function TranqRotate:refreshHunterFrame(hunter)
-    TranqRotate:setHunterFrameColor(hunter)
-    TranqRotate:updateBlindIcon(hunter)
+-- Refresh a single mage frame
+function CombRotate:refreshMageFrame(mage)
+    CombRotate:setMageFrameColor(mage)
+    CombRotate:updateBlindIcon(mage)
 end
 
--- Set the hunter frame color regarding it's status
-function TranqRotate:setHunterFrameColor(hunter)
+-- Set the mage frame color regarding it's status
+function CombRotate:setMageFrameColor(mage)
 
-    local color = TranqRotate.colors.green
+    local color = CombRotate.colors.green
 
-    if (not TranqRotate:isHunterOnline(hunter)) then
-        color = TranqRotate.colors.gray
-    elseif (not TranqRotate:isHunterAlive(hunter)) then
-        color = TranqRotate.colors.red
-    elseif (hunter.nextTranq) then
-        color = TranqRotate.colors.purple
+    if (not CombRotate:isMageOnline(mage)) then
+        color = CombRotate.colors.gray
+    elseif (not CombRotate:isMageAlive(mage)) then
+        color = CombRotate.colors.red
+    elseif (mage.nextComb) then
+        color = CombRotate.colors.purple
     end
 
-    hunter.frame.texture:SetVertexColor(color:GetRGB())
+    mage.frame.texture:SetVertexColor(color:GetRGB())
 end
 
 -- Toggle blind icon display based on addonVersion
-function TranqRotate:updateBlindIcon(hunter)
+function CombRotate:updateBlindIcon(mage)
     if (
-        not TranqRotate.db.profile.showIconOnHunterWithoutTranqRotate or
-        TranqRotate.addonVersions[hunter.name] ~= nil or
-        hunter.name == UnitName('player') or
-        not TranqRotate:isHunterOnline(hunter)
+        not CombRotate.db.profile.showIconOnMageWithoutCombRotate or
+        CombRotate.addonVersions[mage.name] ~= nil or
+        mage.name == UnitName('player') or
+        not CombRotate:isMageOnline(mage)
     ) then
-        hunter.frame.blindIconFrame:Hide()
+        mage.frame.blindIconFrame:Hide()
     else
-        hunter.frame.blindIconFrame:Show()
+        mage.frame.blindIconFrame:Show()
     end
 end
 
 -- Refresh all blind icons
-function TranqRotate:refreshBlindIcons()
-    for _, hunter in pairs(TranqRotate.hunterTable) do
-        TranqRotate:updateBlindIcon(hunter)
+function CombRotate:refreshBlindIcons()
+    for _, mage in pairs(CombRotate.mageTable) do
+        CombRotate:updateBlindIcon(mage)
     end
 end
 
--- Starts the tranq cooldown progress
-function TranqRotate:startHunterCooldown(hunter)
-    hunter.frame.cooldownFrame.statusBar:SetMinMaxValues(GetTime(), GetTime() + 20)
-    hunter.frame.cooldownFrame.statusBar.expirationTime = GetTime() + 20
-    hunter.frame.cooldownFrame:Show()
-end
-
--- Initialize the frenzy cooldown status bar
-function TranqRotate:startBossFrenzyCooldown(cooldownDuration)
-    TranqRotate.mainFrame.frenzyFrame.statusBar:GetStatusBarTexture():SetColorTexture(1, 0.4, 0);
-    TranqRotate.mainFrame.frenzyFrame.statusBar:SetMinMaxValues(GetTime(), GetTime() + cooldownDuration)
-    TranqRotate.mainFrame.frenzyFrame.statusBar.expirationTime = GetTime() + cooldownDuration
-    TranqRotate.mainFrame.frenzyFrame:Show()
-end
-
--- Reinitialize the frenzy frame
-function TranqRotate:resetFrenzyFrame()
-    TranqRotate.mainFrame.frenzyFrame.statusBar:GetStatusBarTexture():SetColorTexture(1, 0.4, 0);
-    TranqRotate.mainFrame.frenzyFrame.statusBar.expirationTime = nil
-    TranqRotate.mainFrame.frenzyFrame:Hide()
+-- Starts the combustion cooldown progress
+function CombRotate:startMageCooldown(mage)
+    mage.frame.cooldownFrame.statusBar:SetMinMaxValues(GetTime(), GetTime() + 20)
+    mage.frame.cooldownFrame.statusBar.expirationTime = GetTime() + 20
+    mage.frame.cooldownFrame:Show()
 end
 
 -- Lock/Unlock the mainFrame position
-function TranqRotate:lock(lock)
-    TranqRotate.db.profile.lock = lock
-    TranqRotate:applySettings()
+function CombRotate:lock(lock)
+    CombRotate.db.profile.lock = lock
+    CombRotate:applySettings()
 
     if (lock) then
-        TranqRotate:printMessage(L['WINDOW_LOCKED'])
+        CombRotate:printMessage(L['WINDOW_LOCKED'])
     else
-        TranqRotate:printMessage(L['WINDOW_UNLOCKED'])
+        CombRotate:printMessage(L['WINDOW_UNLOCKED'])
     end
 end

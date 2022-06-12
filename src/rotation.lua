@@ -1,294 +1,248 @@
-local L = TranqRotate.L
+local L = CombRotate.L
 
--- Adds hunter to global table and one of the two rotation tables
-function TranqRotate:registerHunter(hunterName)
+-- Adds mage to global table and one of the two rotation tables
+function CombRotate:registerMage(mageName)
 
-    -- Initialize hunter 'object'
-    local hunter = {}
-    hunter.name = hunterName
-    hunter.GUID = UnitGUID(hunterName)
-    hunter.frame = nil
-    hunter.nextTranq = false
-    hunter.lastTranqTime = 0
-    hunter.lastFailTime = 0
+    -- Initialize mage 'object'
+    local mage = {}
+    mage.name = mageName
+    mage.GUID = UnitGUID(mageName)
+    mage.frame = nil
+    mage.nextComb = false
+    mage.lastCombTime = 0
+    mage.lastFailTime = 0
 
     -- Add to global list
-    table.insert(TranqRotate.hunterTable, hunter)
+    table.insert(CombRotate.mageTable, mage)
 
     -- Add to rotation or backup group depending on rotation group size
-    if (#TranqRotate.rotationTables.rotation > 2) then
-        table.insert(TranqRotate.rotationTables.backup, hunter)
+    if (#CombRotate.rotationTables.rotation > 2) then
+        table.insert(CombRotate.rotationTables.backup, mage)
     else
-        table.insert(TranqRotate.rotationTables.rotation, hunter)
+        table.insert(CombRotate.rotationTables.rotation, mage)
     end
 
-    TranqRotate:drawHunterFrames()
+    CombRotate:drawMageFrames()
 
-    return hunter
+    return mage
 end
 
--- Removes a hunter from all lists
-function TranqRotate:removeHunter(deletedHunter)
+-- Removes a mage from all lists
+function CombRotate:removeMage(deletedMage)
 
     -- Clear from global list
-    for key, hunter in pairs(TranqRotate.hunterTable) do
-        if (hunter.name == deletedHunter.name) then
-            TranqRotate:hideHunter(hunter)
-            table.remove(TranqRotate.hunterTable, key)
+    for key, mage in pairs(CombRotate.mageTable) do
+        if (mage.name == deletedMage.name) then
+            CombRotate:hideMage(mage)
+            table.remove(CombRotate.mageTable, key)
             break
         end
     end
 
     -- clear from rotation lists
-    for key, hunterTable in pairs(TranqRotate.rotationTables) do
-        for subkey, hunter in pairs(hunterTable) do
-            if (hunter.name == deletedHunter.name) then
-                table.remove(hunterTable, subkey)
+    for key, mageTable in pairs(CombRotate.rotationTables) do
+        for subkey, mage in pairs(mageTable) do
+            if (mage.name == deletedMage.name) then
+                table.remove(mageTable, subkey)
             end
         end
     end
 
-    TranqRotate:drawHunterFrames()
+    CombRotate:drawMageFrames()
 end
 
--- Update the rotation list once a tranq has been done.
--- The parameter is the hunter that used it's tranq
-function TranqRotate:rotate(lastHunter, rotateWithoutCooldown)
+-- Update the rotation list once a combustion has been applied.
+-- The parameter is the mage that applied it
+function CombRotate:rotate(lastMage, rotateWithoutCooldown)
 
-    TranqRotate.frenzy = false
-    local lastHunterRotationTable = TranqRotate:getHunterRotationTable(lastHunter)
+    local lastMageRotationTable = CombRotate:getMageRotationTable(lastMage)
 
-    lastHunter.lastTranqTime = GetTime()
+    lastMage.lastCombTime = GetTime()
 
     -- Do not trigger cooldown when rotation from a dead or disconnected status
     if (rotateWithoutCooldown ~= true) then
-        TranqRotate:startHunterCooldown(lastHunter)
+        CombRotate:startMageCooldown(lastMage)
     end
 
-    local nextHunter = nil
+    local nextMage = nil
 
-    if (lastHunterRotationTable == TranqRotate.rotationTables.rotation) then
-        nextHunter = TranqRotate:getNextRotationHunter(lastHunter)
+    if (lastMageRotationTable == CombRotate.rotationTables.rotation) then
+        nextMage = CombRotate:getNextRotationMage(lastMage)
 
-        if (nextHunter ~= nil) then
-            TranqRotate:setNextTranq(nextHunter)
+        if (nextMage ~= nil) then
+            CombRotate:setNextComb(nextMage)
         end
     end
 end
 
--- Handle miss or dispel resist scenario
-function TranqRotate:handleFailTranq(hunter, event)
+-- Removes all nextComb flags and set it true for next caster
+function CombRotate:setNextComb(nextMage)
+    for key, mage in pairs(CombRotate.rotationTables.rotation) do
+        if (mage.name == nextMage.name) then
+            mage.nextComb = true
 
-    -- Do not process multiple SPELL_DISPEL_FAILED events or multiple fail broadcasts
-    local duplicate = hunter.lastFailTime >=  GetTime() - TranqRotate.constants.duplicateFailedTranqshotDelayThreshold
-    if (duplicate) then
-        return
-    end
-
-    TranqRotate:printFail(hunter, event)
-
-    local playerName, realm = UnitName("player")
-    local hasPlayerFailed = playerName == hunter.name
-    local nextHunter = TranqRotate:getHighlightedHunter()
-    local lastHunterRotationTable = TranqRotate:getHunterRotationTable(hunter)
-
-    -- Could happen if the first event received is a miss/resist
-    if (nextHunter == nil) then
-        nextHunter = TranqRotate:getNextRotationHunter(hunter)
-    end
-
-    hunter.lastFailTime = GetTime()
-
-    -- No backup, if player is next in rotation he will be warned to handle the fail
-    if (
-        lastHunterRotationTable == TranqRotate.rotationTables.rotation and
-        nextHunter.name == playerName and
-        #TranqRotate.rotationTables.backup < 1 and
-        TranqRotate:isHunterTranqCooldownReady(nextHunter)
-    ) then
-        TranqRotate:throwTranqAlert()
-    end
-
-    -- The player failed, sending fail message and backup alerts
-    if (hasPlayerFailed) then
-        TranqRotate:alertBackup(TranqRotate.db.profile.whisperFailMessage, nextHunter, true)
-    end
-
-    -- Player is in backup group, display an alert when someone fails
-    local playerRotationTable = TranqRotate:getHunterRotationTable(TranqRotate:getHunter(playerName))
-    if (playerRotationTable == TranqRotate.rotationTables.backup and not hasPlayerFailed) then
-        TranqRotate:throwTranqAlert()
-    end
-end
-
--- Removes all nextTranq flags and set it true for next shooter
-function TranqRotate:setNextTranq(nextHunter)
-    for key, hunter in pairs(TranqRotate.rotationTables.rotation) do
-        if (hunter.name == nextHunter.name) then
-            hunter.nextTranq = true
-
-            if (nextHunter.name == UnitName("player")) and TranqRotate.db.profile.enableNextToTranqSound then
-                PlaySoundFile(TranqRotate.constants.sounds.nextToTranq)
+            if (nextMage.name == UnitName("player")) and CombRotate.db.profile.enableNextToCombSound then
+                PlaySoundFile(CombRotate.constants.sounds.nextToComb)
             end
         else
-            hunter.nextTranq = false
+            mage.nextComb = false
         end
 
-        TranqRotate:refreshHunterFrame(hunter)
+        CombRotate:refreshMageFrame(mage)
     end
 end
 
--- Check if the player is the next in position to tranq
-function TranqRotate:isPlayerNextTranq()
+-- Check if the player is the next in position to comb
+function CombRotate:isPlayerNextComb()
 
-    if(not TranqRotate:isHunter("player")) then
+    if(not CombRotate:isMage("player")) then
         return false
     end
 
-    local player = TranqRotate:getHunter(UnitGUID("player"))
+    local player = CombRotate:getMage(UnitGUID("player"))
 
-    if (not player.nextTranq) then
+    if (not player.nextComb) then
 
         local isRotationInitialized = false;
-        local rotationTable = TranqRotate.rotationTables.rotation
+        local rotationTable = CombRotate.rotationTables.rotation
 
-        -- checking if a hunter is flagged nextTranq
-        for key, hunter in pairs(rotationTable) do
-            if (hunter.nextTranq) then
+        -- checking if a mage is flagged nextComb
+        for key, mage in pairs(rotationTable) do
+            if (mage.nextComb) then
                 isRotationInitialized = true;
                 break
             end
         end
 
-        -- First in rotation has to tranq if not one is flagged
-        if (not isRotationInitialized and TranqRotate:getHunterIndex(player, rotationTable) == 1) then
+        -- First in rotation has to use combustion if not one is active
+        if (not isRotationInitialized and CombRotate:getMageIndex(player, rotationTable) == 1) then
             return true
         end
 
     end
 
-    return player.nextTranq
+    return player.nextComb
 end
 
--- Find and returns the next hunter that will tranq base on last shooter
-function TranqRotate:getNextRotationHunter(lastHunter)
+-- Find and returns the next mage that will trigger combustion on last caster
+function CombRotate:getNextRotationMage(lastMage)
 
-    local rotationTable = TranqRotate.rotationTables.rotation
-    local nextHunter
-    local lastHunterIndex = 1
+    local rotationTable = CombRotate.rotationTables.rotation
+    local nextMage
+    local lastMageIndex = 1
 
-    -- Finding last hunter index in rotation
-    for key, hunter in pairs(rotationTable) do
-        if (hunter.name == lastHunter.name) then
-            lastHunterIndex = key
+    -- Finding last mage index in rotation
+    for key, mage in pairs(rotationTable) do
+        if (mage.name == lastMage.name) then
+            lastMageIndex = key
             break
         end
     end
 
-    -- Search from last hunter index if not last on rotation
-    if (lastHunterIndex < #rotationTable) then
-        for index = lastHunterIndex + 1 , #rotationTable, 1 do
-            local hunter = rotationTable[index]
-            if (TranqRotate:isEligibleForNextTranq(hunter)) then
-                nextHunter = hunter
+    -- Search from last mage index if not last on rotation
+    if (lastMageIndex < #rotationTable) then
+        for index = lastMageIndex + 1 , #rotationTable, 1 do
+            local mage = rotationTable[index]
+            if (CombRotate:isEligibleForNextComb(mage)) then
+                nextMage = mage
                 break
             end
         end
     end
 
     -- Restart search from first index
-    if (nextHunter == nil) then
-        for index = 1 , lastHunterIndex, 1 do
-            local hunter = rotationTable[index]
-            if (TranqRotate:isEligibleForNextTranq(hunter)) then
-                nextHunter = hunter
+    if (nextMage == nil) then
+        for index = 1 , lastMageIndex, 1 do
+            local mage = rotationTable[index]
+            if (CombRotate:isEligibleForNextComb(mage)) then
+                nextMage = mage
                 break
             end
         end
     end
 
-    -- If no hunter in the rotation match the alive/online/CD criteria
-    -- Pick the hunter with the lowest cooldown
-    if (nextHunter == nil and #rotationTable > 0) then
-        local latestTranq = GetTime() + 1
-        for key, hunter in pairs(rotationTable) do
-            if (TranqRotate:isHunterAliveAndOnline(hunter) and hunter.lastTranqTime < latestTranq) then
-                nextHunter = hunter
-                latestTranq = hunter.lastTranqTime
+    -- If no mage in the rotation match the alive/online/CD criteria
+    -- Pick the mage with the lowest cooldown
+    if (nextMage == nil and #rotationTable > 0) then
+        local latestComb = GetTime() + 1
+        for key, mage in pairs(rotationTable) do
+            if (CombRotate:isMageAliveAndOnline(mage) and mage.lastCombTime < latestComb) then
+                nextMage = mage
+                latestComb = mage.lastCombTime
             end
         end
     end
 
-    return nextHunter
+    return nextMage
 end
 
--- Init/Reset rotation status, next tranq is the first hunter on the list
-function TranqRotate:resetRotation()
+-- Init/Reset rotation status, next combustion is the first mage on the list
+function CombRotate:resetRotation()
 
-    TranqRotate.lastRotationReset = GetTime()
+    CombRotate.lastRotationReset = GetTime()
 
-    for key, hunter in pairs(TranqRotate.rotationTables.rotation) do
-        hunter.nextTranq = false
-        TranqRotate:refreshHunterFrame(hunter)
+    for key, mage in pairs(CombRotate.rotationTables.rotation) do
+        mage.nextComb = false
+        CombRotate:refreshMageFrame(mage)
     end
 end
 
--- TEST FUNCTION - Manually rotate hunters for test purpose
-function TranqRotate:testRotation()
+-- TEST FUNCTION - Manually rotate mages for test purpose
+function CombRotate:testRotation()
 
-    local hunterToRotate = nil
-    for key, hunter in pairs(TranqRotate.rotationTables.rotation) do
-        if (hunter.nextTranq) then
-            hunterToRotate = hunter
+    local mageToRotate = nil
+    for key, mage in pairs(CombRotate.rotationTables.rotation) do
+        if (mage.nextComb) then
+            mageToRotate = mage
             break
         end
     end
 
-    if (not hunterToRotate) then
-        hunterToRotate = TranqRotate.rotationTables.rotation[1]
+    if (not mageToRotate) then
+        mageToRotate = CombRotate.rotationTables.rotation[1]
     end
 
-    TranqRotate:sendSyncTranq(hunterToRotate, false, GetTime())
-    TranqRotate:rotate(hunterToRotate)
+    CombRotate:sendSyncComb(mageToRotate, false, GetTime())
+    CombRotate:rotate(mageToRotate)
 end
 
--- Return our hunter object from name or GUID
-function TranqRotate:getHunter(searchTerm)
+-- Return our mage object from name or GUID
+function CombRotate:getMage(searchTerm)
 
     if (searchTerm == nil) then
         return nil
     end
 
-    for _, hunter in pairs(TranqRotate.hunterTable) do
-        if (hunter.GUID == searchTerm or hunter.name == searchTerm) then
-            return hunter
+    for _, mage in pairs(CombRotate.mageTable) do
+        if (mage.GUID == searchTerm or mage.name == searchTerm) then
+            return mage
         end
     end
 
     return nil
 end
 
--- Iterate over hunter list and purge hunter that aren't in the group anymore
-function TranqRotate:purgeHunterList()
+-- Iterate over mage list and purge mages that aren't in the group anymore
+function CombRotate:purgeMageList()
 
-    local hunterToRemove = {}
+    local mageToRemove = {}
 
-    for _, hunter in pairs(TranqRotate.hunterTable) do
-        if (not UnitInParty(hunter.name)) then
-            table.insert(hunterToRemove, hunter)
+    for _, mage in pairs(CombRotate.mageTable) do
+        if (not UnitInParty(mage.name)) then
+            table.insert(mageToRemove, mage)
         end
     end
 
-    for _, hunter in pairs(hunterToRemove) do
-        TranqRotate:unregisterUnitEvents(hunter)
-        TranqRotate:removeHunter(hunter)
+    for _, mage in pairs(mageToRemove) do
+        CombRotate:unregisterUnitEvents(mage)
+        CombRotate:removeMage(mage)
     end
 end
 
--- Iterate over all raid members to find hunters and update their status
-function TranqRotate:updateRaidStatus()
+-- Iterate over all raid members to find mages and update their status
+function CombRotate:updateRaidStatus()
 
-    if (TranqRotate:isInPveRaid()) then
+    if (CombRotate:isInPveRaid()) then
 
         local playerCount = GetNumGroupMembers()
         local complete = true
@@ -299,16 +253,16 @@ function TranqRotate:updateRaidStatus()
 
             -- Players name might be nil at loading
             if (name ~= nil) then
-                if(TranqRotate:isHunter(name)) then
-                    local hunter = TranqRotate:getHunter(UnitGUID(name))
+                if(CombRotate:isMage(name)) then
+                    local mage = CombRotate:getMage(UnitGUID(name))
 
-                    if (hunter == nil and not InCombatLockdown()) then
-                        hunter = TranqRotate:registerHunter(name)
-                        TranqRotate:registerUnitEvents(hunter)
+                    if (mage == nil and not InCombatLockdown()) then
+                        mage = CombRotate:registerMage(name)
+                        CombRotate:registerUnitEvents(mage)
                     end
 
-                    if (hunter ~= nil) then
-                        TranqRotate:updateHunterStatus(hunter)
+                    if (mage ~= nil) then
+                        CombRotate:updateMageStatus(mage)
                     end
                 end
             else
@@ -316,59 +270,59 @@ function TranqRotate:updateRaidStatus()
             end
         end
 
-        TranqRotate:updateDragAndDrop()
+        CombRotate:updateDragAndDrop()
 
-        if (not TranqRotate.raidInitialized) then
-            if (not TranqRotate.db.profile.doNotShowWindowOnRaidJoin) then
-                TranqRotate:updateDisplay()
+        if (not CombRotate.raidInitialized) then
+            if (not CombRotate.db.profile.doNotShowWindowOnRaidJoin) then
+                CombRotate:updateDisplay()
             end
-            TranqRotate:sendSyncOrderRequest()
-            TranqRotate.raidInitialized = true
+            CombRotate:sendSyncOrderRequest()
+            CombRotate.raidInitialized = true
         end
 
         -- If some player names are nil, retry
-        if (not complete and not TranqRotate.delayedUpdate) then
-            TranqRotate.delayedUpdate = true
+        if (not complete and not CombRotate.delayedUpdate) then
+            CombRotate.delayedUpdate = true
             C_Timer.After(1, function()
-                TranqRotate.delayedUpdate = false
-                TranqRotate:updateRaidStatus()
+                CombRotate.delayedUpdate = false
+                CombRotate:updateRaidStatus()
             end)
         end
     else
-        if(TranqRotate.raidInitialized == true) then
-            TranqRotate:updateDisplay()
-            TranqRotate.raidInitialized = false
+        if(CombRotate.raidInitialized == true) then
+            CombRotate:updateDisplay()
+            CombRotate.raidInitialized = false
         end
     end
 
-    TranqRotate:purgeHunterList()
-    TranqRotate:purgeAddonVersions()
+    CombRotate:purgeMageList()
+    CombRotate:purgeAddonVersions()
 end
 
--- Update hunter status
-function TranqRotate:updateHunterStatus(hunter)
+-- Update mage status
+function CombRotate:updateMageStatus(mage)
 
-    -- Jump to the next hunter if the current one is dead or offline
-    if (hunter.nextTranq and (not TranqRotate:isHunterAliveAndOnline(hunter))) then
-        TranqRotate:rotate(hunter, true)
+    -- Jump to the next mage if the current one is dead or offline
+    if (mage.nextComb and (not CombRotate:isMageAliveAndOnline(mage))) then
+        CombRotate:rotate(mage, true)
     end
 
-    TranqRotate:refreshHunterFrame(hunter)
+    CombRotate:refreshMageFrame(mage)
 end
 
--- Moves given hunter to the given position in the given group (ROTATION or BACKUP)
-function TranqRotate:moveHunter(hunter, group, position)
+-- Moves given mage to the given position in the given group (ROTATION or BACKUP)
+function CombRotate:moveMage(mage, group, position)
 
-    local originTable = TranqRotate:getHunterRotationTable(hunter)
-    local originIndex = TranqRotate:getHunterIndex(hunter, originTable)
+    local originTable = CombRotate:getMageRotationTable(mage)
+    local originIndex = CombRotate:getMageIndex(mage, originTable)
 
-    local destinationTable = TranqRotate.rotationTables.rotation
+    local destinationTable = CombRotate.rotationTables.rotation
     local finalIndex = position
 
     if (group == 'BACKUP') then
-        destinationTable = TranqRotate.rotationTables.backup
-        -- Remove nextTranq flag when moved to backup
-        hunter.nextTranq = false
+        destinationTable = CombRotate.rotationTables.backup
+        -- Remove nextComb flag when moved to backup
+        mage.nextComb = false
     end
 
     -- Setting originalIndex
@@ -396,32 +350,32 @@ function TranqRotate:moveHunter(hunter, group, position)
     if (sameTableMove) then
         if (originIndex ~= finalIndex) then
             table.remove(originTable, originIndex)
-            table.insert(originTable, finalIndex, hunter)
+            table.insert(originTable, finalIndex, mage)
         end
     else
         table.remove(originTable, originIndex)
-        table.insert(destinationTable, finalIndex, hunter)
+        table.insert(destinationTable, finalIndex, mage)
     end
 
-    TranqRotate:drawHunterFrames()
+    CombRotate:drawMageFrames()
 end
 
--- Find the table that contains given hunter (rotation or backup)
-function TranqRotate:getHunterRotationTable(hunter)
-    if (TranqRotate:tableContains(TranqRotate.rotationTables.rotation, hunter)) then
-        return TranqRotate.rotationTables.rotation
+-- Find the table that contains given mage (rotation or backup)
+function CombRotate:getMageRotationTable(mage)
+    if (CombRotate:tableContains(CombRotate.rotationTables.rotation, mage)) then
+        return CombRotate.rotationTables.rotation
     end
-    if (TranqRotate:tableContains(TranqRotate.rotationTables.backup, hunter)) then
-        return TranqRotate.rotationTables.backup
+    if (CombRotate:tableContains(CombRotate.rotationTables.backup, mage)) then
+        return CombRotate.rotationTables.backup
     end
 end
 
--- Returns a hunter's index in the given table
-function TranqRotate:getHunterIndex(hunter, table)
+-- Returns a mages' index in the given table
+function CombRotate:getMageIndex(mage, table)
     local originIndex = 0
 
-    for key, loopHunter in pairs(table) do
-        if (hunter.name == loopHunter.name) then
+    for key, loopMage in pairs(table) do
+        if (mage.name == loopMage.name) then
             originIndex = key
             break
         end
@@ -430,14 +384,14 @@ function TranqRotate:getHunterIndex(hunter, table)
     return originIndex
 end
 
--- Builds simple rotation tables containing only hunters names
-function TranqRotate:getSimpleRotationTables()
+-- Builds simple rotation tables containing only mage names
+function CombRotate:getSimpleRotationTables()
 
     local simpleTables = { rotation = {}, backup = {} }
 
-    for key, rotationTable in pairs(TranqRotate.rotationTables) do
-        for _, hunter in pairs(rotationTable) do
-            table.insert(simpleTables[key], hunter.GUID)
+    for key, rotationTable in pairs(CombRotate.rotationTables) do
+        for _, mage in pairs(rotationTable) do
+            table.insert(simpleTables[key], mage.GUID)
         end
     end
 
@@ -445,7 +399,7 @@ function TranqRotate:getSimpleRotationTables()
 end
 
 -- Apply a simple rotation configuration
-function TranqRotate:applyRotationConfiguration(rotationsTables)
+function CombRotate:applyRotationConfiguration(rotationsTables)
 
     for key, rotationTable in pairs(rotationsTables) do
 
@@ -455,115 +409,86 @@ function TranqRotate:applyRotationConfiguration(rotationsTables)
         end
 
         for index, GUID in pairs(rotationTable) do
-            local hunter = TranqRotate:getHunter(GUID)
-            if (hunter) then
-                TranqRotate:moveHunter(hunter, group, index)
+            local mage = CombRotate:getMage(GUID)
+            if (mage) then
+                CombRotate:moveMage(mage, group, index)
             end
         end
     end
 end
 
--- Display an alert and play a sound when the player should immediatly tranq
-function TranqRotate:throwTranqAlert()
-    RaidNotice_AddMessage(RaidWarningFrame, L['TRANQ_NOW_LOCAL_ALERT_MESSAGE'], ChatTypeInfo["RAID_WARNING"])
+-- Display an alert and play a sound when the player should immediately use combustion
+function CombRotate:throwCombAlert()
+    RaidNotice_AddMessage(RaidWarningFrame, L['COMB_NOW_LOCAL_ALERT_MESSAGE'], ChatTypeInfo["RAID_WARNING"])
 
-    if (TranqRotate.db.profile.enableTranqNowSound) then
-        PlaySoundFile(TranqRotate.constants.sounds.alarms[TranqRotate.db.profile.tranqNowSound])
+    if (CombRotate.db.profile.enableCombNowSound) then
+        PlaySoundFile(CombRotate.constants.sounds.alarms[CombRotate.db.profile.combNowSound])
     end
 end
 
 -- Send a defined message to backup player or next rotation player if there's no backup
-function TranqRotate:alertBackup(message, nextHunter, noComms)
+function CombRotate:alertBackup(message, nextMage, noComms)
     local playerName = UnitName('player')
-    local player = TranqRotate:getHunter(playerName)
+    local player = CombRotate:getMage(playerName)
 
-    -- Non hunter have no reason to ask for backup
-    if (not TranqRotate:isHunter('player')) then
+    -- Non mage have no reason to ask for backup
+    if (not CombRotate:isMage('player')) then
         return
     end
 
-    if (#TranqRotate.rotationTables.backup < 1) then
+    if (#CombRotate.rotationTables.backup < 1) then
 
-        if (nextHunter == nil) then
-            nextHunter = TranqRotate:getNextRotationHunter(player)
+        if (nextMage == nil) then
+            nextMage = CombRotate:getNextRotationMage(player)
         end
 
-        if (playerName ~= nextHunter.name) then
-            SendChatMessage(message, 'WHISPER', nil, nextHunter.name)
+        if (playerName ~= nextMage.name) then
+            SendChatMessage(message, 'WHISPER', nil, nextMage.name)
             if (noComms ~= true) then
-                TranqRotate:sendBackupRequest(nextHunter.name)
-            end
-        end
-    else
-        TranqRotate:whisperBackup(message, noComms)
-    end
-end
-
--- Whisper provided message of fail message to all backup except player
-function TranqRotate:whisperBackup(message, noComms)
-
-    if (message == nil) then
-        message = TranqRotate.db.profile.whisperFailMessage
-    end
-
-    for key, backupHunter in pairs(TranqRotate.rotationTables.backup) do
-        if (backupHunter.name ~= UnitName("player")) then
-            SendChatMessage(message, 'WHISPER', nil, backupHunter.name)
-
-            if (noComms ~= true) then
-                TranqRotate:sendBackupRequest(backupHunter.name)
+                CombRotate:sendBackupRequest(nextMage.name)
             end
         end
     end
 end
 
--- Returns the hunter currently wearing the "next" flag
-function TranqRotate:getHighlightedHunter()
+-- Returns the mage currently wearing the "next" flag
+function CombRotate:getHighlightedMage()
 
-    for key,hunter in pairs(TranqRotate.rotationTables.rotation) do
-        if (hunter.nextTranq) then
-            return hunter
+    for key, mage in pairs(CombRotate.rotationTables.rotation) do
+        if (mage.nextComb) then
+            return mage
         end
     end
 
     return nil
 end
 
-function TranqRotate:getTranqSuccessMessage(isBossTranq, targetName, raidIconFlags)
+function CombRotate:getCombSuccessMessage(targetName, raidIconFlags)
 
-    local message = ""
-    if (isBossTranq) then
-        message = TranqRotate.db.profile.announceBossSuccessMessage
-        local hunter = TranqRotate:getHighlightedHunter()
-        message = string.format(message, TranqRotate:formatPlayerName(hunter.name))
-    else
-        message = TranqRotate.db.profile.announceTrashSuccessMessage
-        message = string.format(
-            message,
-            TranqRotate:getRaidTargetIcon(raidIconFlags) .. targetName
-        )
-    end
+    local message = CombRotate.db.profile.announceBossSuccessMessage
+    local mage = CombRotate:getHighlightedMage()
+    message = string.format(message, CombRotate:formatPlayerName(mage.name))
 
     return message
 end
 
-function TranqRotate:getTranqFailMessage(targetName, raidIconFlags)
+function CombRotate:getCombImmuneMessage(targetName, raidIconFlags)
 
-    local message = TranqRotate.db.profile.announceFailMessage
+    local message = CombRotate.db.profile.announceImmuneMessage
     message = string.format(
         message,
-        TranqRotate:getRaidTargetIcon(raidIconFlags) .. targetName
+        CombRotate:getRaidTargetIcon(raidIconFlags) .. targetName
     )
 
     return message
 end
 
-function TranqRotate:handleResetButton()
-    TranqRotate:updateRaidStatus()
-    if (TranqRotate:isPlayerAllowedToManageRotation()) then
-        TranqRotate:resetRotation()
-        TranqRotate:sendResetBroadcast()
+function CombRotate:handleResetButton()
+    CombRotate:updateRaidStatus()
+    if (CombRotate:isPlayerAllowedToManageRotation()) then
+        CombRotate:resetRotation()
+        CombRotate:sendResetBroadcast()
     else
-        TranqRotate:printPrefixedMessage(L["RESET_UNAUTHORIZED"])
+        CombRotate:printPrefixedMessage(L["RESET_UNAUTHORIZED"])
     end
 end

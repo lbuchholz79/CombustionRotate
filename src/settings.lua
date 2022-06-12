@@ -3,21 +3,21 @@ local Addon = select(1, ...)
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
-local L = TranqRotate.L
+local L = CombRotate.L
 
-function TranqRotate:CreateConfig()
+function CombRotate:CreateConfig()
 
 	local function get(info)
-		return TranqRotate.db.profile[info[#info]]
+		return CombRotate.db.profile[info[#info]]
 	end
 
 	local function set(info, value)
-		TranqRotate.db.profile[info[#info]] = value
-        TranqRotate:applySettings()
+		CombRotate.db.profile[info[#info]] = value
+        CombRotate:applySettings()
 	end
 
 	local options = {
-		name = "TranqRotate",
+		name = "CombustionRotate",
 		type = "group",
 		get = get,
 		set = set,
@@ -29,16 +29,10 @@ function TranqRotate:CreateConfig()
                 order = 1,
                 args = {
                     descriptionText = {
-                        name = "TranqRotate v" .. TranqRotate.version .. " by Slivo-Sulfuron",
+                        name = "CombustionRotate v" .. CombRotate.version .. " by Teilzeit-Jedi",
                         type = "description",
                         width = "full",
                         order = 1,
-                    },
-                    repoLink = {
-                        name = L['SETTING_GENERAL_REPORT'] .. " https://github.com/Slivo-fr/TranqRotate",
-                        type = "description",
-                        width = "full",
-                        order = 2,
                     },
                     spacer4 = {
                         name = ' ',
@@ -57,7 +51,7 @@ function TranqRotate:CreateConfig()
                         name = L["RESET_WINDOW_POSITION"],
                         type = "execute",
                         order = 7,
-                        func = function() TranqRotate:resetMainWindowPosition() end
+                        func = function() CombRotate:resetMainWindowPosition() end
                     },
                     hideNotInRaid = {
                         name = L["HIDE_WINDOW_NOT_IN_RAID"],
@@ -86,22 +80,16 @@ function TranqRotate:CreateConfig()
                         type = "select",
                         order = 12,
                         values = {
-                            [TranqRotate.constants.playerNameFormats.PLAYER_NAME_ONLY] = L["PLAYER_NAME_ONLY_OPTION_LABEL"],
-                            [TranqRotate.constants.playerNameFormats.SHORT] = L["SHORTENED_SUFFIX_OPTION_LABEL"],
-                            [TranqRotate.constants.playerNameFormats.FULL_NAME] = L["FULL_NAME_OPTION_LABEL"],
+                            [CombRotate.constants.playerNameFormats.PLAYER_NAME_ONLY] = L["PLAYER_NAME_ONLY_OPTION_LABEL"],
+                            [CombRotate.constants.playerNameFormats.SHORT] = L["SHORTENED_SUFFIX_OPTION_LABEL"],
+                            [CombRotate.constants.playerNameFormats.FULL_NAME] = L["FULL_NAME_OPTION_LABEL"],
                         },
-                        set = function(info, value) set(info,value) TranqRotate:drawHunterFrames() end
+                        set = function(info, value) set(info,value) CombRotate:drawMageFrames() end
                     },
                     testHeader = {
                         name = L["TEST_MODE_HEADER"],
                         type = "header",
                         order = 30,
-                    },
-                    ToggleArcaneShotTestingDesc = {
-                        name = L['ENABLE_ARCANE_SHOT_TESTING_DESC'],
-                        type = "description",
-                        width = "full",
-                        order = 31,
                     },
                     spacer12 = {
                         name = ' ',
@@ -109,35 +97,18 @@ function TranqRotate:CreateConfig()
                         width = "full",
                         order = 32,
                     },
-                    ToggleArcaneShotTesting = {
-                        name = L["ENABLE_ARCANE_SHOT_TESTING"],
-                        type = "execute",
-                        order = 33,
-                        func = function() TranqRotate.toggleArcaneShotTesting() end
-                    },
                     featuresHeader = {
                         name = L["FEATURES_HEADER"],
                         type = "header",
                         order = 50,
                     },
-                    showFrenzyCooldownProgress = {
-                        name = L["DISPLAY_BOSS_FRENZY_COOLDOWN"],
-                        desc = L["DISPLAY_BOSS_FRENZY_COOLDOWN_DESC"],
-                        type = "toggle",
-                        order = 51,
-                        width = "full",
-                        set = function(info, value)
-                            set(info, value)
-                            if (not value) then TranqRotate:resetFrenzyFrame() end
-                        end
-                    },
-                    showIconOnHunterWithoutTranqRotate = {
+                    showIconOnMageWithoutCombRotate = {
                         name = L["DISPLAY_BLIND_ICON"],
                         desc = L["DISPLAY_BLIND_ICON_DESC"],
                         type = "toggle",
                         order = 52,
                         width = "full",
-                        set = function(info, value) set(info,value) TranqRotate:refreshBlindIcons() end
+                        set = function(info, value) set(info,value) CombRotate:refreshBlindIcons() end
                     },
                     showBlindIconTooltip = {
                         name = L["DISPLAY_BLIND_ICON_TOOLTIP"],
@@ -162,13 +133,6 @@ function TranqRotate:CreateConfig()
                         min = 1,
                         max = 6,
                         step = 0.1,
-                    },
-                    enableTimedBackupAlert = {
-                        name = L["ENABLE_AUTOMATIC_TIMED_BACKUP_ALERT"],
-                        desc = L["ENABLE_AUTOMATIC_TIMED_BACKUP_ALERT_DESC"],
-                        type = "toggle",
-                        order = 56,
-                        width = "double",
                     },
                     timedBackupAlertDelay = {
                         name = L["TIMED_DELAY_THRESHOLD"],
@@ -231,19 +195,13 @@ function TranqRotate:CreateConfig()
                         width = "double",
                     },
                     announceFailMessage = {
-                        name = L["FAIL_MESSAGE_LABEL"],
+                        name = L["FAIL_IMMUNE_LABEL"],
                         type = "input",
                         order = 25,
                         width = "double",
                     },
-                    whisperFailMessage = {
-                        name = L["FAIL_WHISPER_LABEL"],
-                        type = "input",
-                        order = 26,
-                        width = "double",
-                    },
-                    unableToTranqMessage = {
-                        name = L["UNABLE_TO_TRANQ_MESSAGE_LABEL"],
+                    unableToCombMessage = {
+                        name = L["UNABLE_TO_COMB_MESSAGE_LABEL"],
                         type = "input",
                         order = 27,
                         width = "double",
@@ -265,14 +223,14 @@ function TranqRotate:CreateConfig()
                             ["PARTY"] = L["CHANNEL_PARTY"],
                             ["RAID"] = L["CHANNEL_RAID"]
                         },
-                        set = function(info, value) set(info,value) LibStub("AceConfigRegistry-3.0", true):NotifyChange("TranqRotate") end
+                        set = function(info, value) set(info,value) LibStub("AceConfigRegistry-3.0", true):NotifyChange("CombRotate") end
                     },
                     setupBroadcastTargetChannel = {
                         name = L["MESSAGE_CHANNEL_NAME"],
                         desc = L["MESSAGE_CHANNEL_NAME_DESC"],
                         type = "input",
                         order = 32,
-                        hidden = function() return not (TranqRotate.db.profile.rotationReportChannelType == "CHANNEL") end,
+                        hidden = function() return not (CombRotate.db.profile.rotationReportChannelType == "CHANNEL") end,
                     },
                     useMultilineRotationReport = {
                         name = L["USE_MULTILINE_ROTATION_REPORT"],
@@ -288,37 +246,31 @@ function TranqRotate:CreateConfig()
                 type = "group",
                 order = 3,
                 args = {
-                    enableNextToTranqSound = {
-                        name = L["ENABLE_NEXT_TO_TRANQ_SOUND"],
-                        desc = L["ENABLE_NEXT_TO_TRANQ_SOUND"],
+                    enableNextToCombSound = {
+                        name = L["ENABLE_NEXT_TO_COMB_SOUND"],
+                        desc = L["ENABLE_NEXT_TO_COMB_SOUND"],
                         type = "toggle",
                         order = 1,
                         width = "full",
                     },
-                    enableTranqNowSound = {
-                        name = L["ENABLE_TRANQ_NOW_SOUND"],
-                        desc = L["ENABLE_TRANQ_NOW_SOUND"],
+                    enableCombNowSound = {
+                        name = L["ENABLE_COMB_NOW_SOUND"],
+                        desc = L["ENABLE_COMB_NOW_SOUND"],
                         type = "toggle",
                         order = 2,
                         width = "full",
                     },
-                    tranqNowSound = {
-                        name = L["TRANQ_NOW_SOUND_CHOICE"],
-                        desc = L["TRANQ_NOW_SOUND_CHOICE"],
+                    combNowSound = {
+                        name = L["COMB_NOW_SOUND_CHOICE"],
+                        desc = L["COMB_NOW_SOUND_CHOICE"],
                         type = "select",
                         style = "dropdown",
                         order = 3,
-                        values = TranqRotate.constants.tranqNowSounds,
+                        values = CombRotate.constants.combNowSounds,
                         set = function(info, value)
                             set(info, value)
-                            PlaySoundFile(TranqRotate.constants.sounds.alarms[value])
+                            PlaySoundFile(CombRotate.constants.sounds.alarms[value])
                         end
-                    },
-                    dbmSoundWarning = {
-                        name = L['DBM_SOUND_WARNING'],
-                        type = "description",
-                        width = "full",
-                        order = 4,
                     },
                 }
             }

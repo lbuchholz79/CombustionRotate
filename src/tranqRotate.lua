@@ -1,110 +1,110 @@
-TranqRotate = select(2, ...)
+CombRotate = select(2, ...)
 
-local L = TranqRotate.L
+local L = CombRotate.L
 
-TranqRotate.version = GetAddOnMetadata(..., "Version")
+CombRotate.version = GetAddOnMetadata(..., "Version")
 
 -- Initialize addon - Shouldn't be call more than once
-function TranqRotate:init()
+function CombRotate:init()
 
-    TranqRotate:LoadDefaults()
+    CombRotate:LoadDefaults()
 
-    TranqRotate.db = LibStub:GetLibrary("AceDB-3.0"):New("TranqRotateDb", self.defaults, true)
-    TranqRotate.db.RegisterCallback(self, "OnProfileChanged", "ProfilesChanged")
-    TranqRotate.db.RegisterCallback(self, "OnProfileCopied", "ProfilesChanged")
-    TranqRotate.db.RegisterCallback(self, "OnProfileReset", "ProfilesChanged")
+    CombRotate.db = LibStub:GetLibrary("AceDB-3.0"):New("CombRotateDb", self.defaults, true)
+    CombRotate.db.RegisterCallback(self, "OnProfileChanged", "ProfilesChanged")
+    CombRotate.db.RegisterCallback(self, "OnProfileCopied", "ProfilesChanged")
+    CombRotate.db.RegisterCallback(self, "OnProfileReset", "ProfilesChanged")
 
-    TranqRotate:CreateConfig()
-    TranqRotate:migrateProfile()
+    CombRotate:CreateConfig()
+    CombRotate:migrateProfile()
 
-    TranqRotate.hunterTable = {}
-    TranqRotate.addonVersions = {}
-    TranqRotate.rotationTables = { rotation = {}, backup = {} }
+    CombRotate.mageTable = {}
+    CombRotate.addonVersions = {}
+    CombRotate.rotationTables = { rotation = {}, backup = {} }
 
-    TranqRotate.raidInitialized = false
-    TranqRotate.testMode = false
-    TranqRotate.frenzy = false
-    TranqRotate.lastRotationReset = 0
+    CombRotate.raidInitialized = false
+    CombRotate.testMode = false
+    CombRotate.frenzy = false
+    CombRotate.lastRotationReset = 0
 
-    TranqRotate:initGui()
-    TranqRotate:updateRaidStatus()
-    TranqRotate:applySettings()
-    TranqRotate:updateDisplay()
-    TranqRotate:updateDragAndDrop()
+    CombRotate:initGui()
+    CombRotate:updateRaidStatus()
+    CombRotate:applySettings()
+    CombRotate:updateDisplay()
+    CombRotate:updateDragAndDrop()
 
-    TranqRotate:initComms()
+    CombRotate:initComms()
 
-    TranqRotate:printMessage(L['LOADED_MESSAGE'])
+    CombRotate:printMessage(L['LOADED_MESSAGE'])
 end
 
 -- Apply setting on profile change
-function TranqRotate:ProfilesChanged()
+function CombRotate:ProfilesChanged()
     self.db:RegisterDefaults(self.defaults)
     self:applySettings()
 end
 
 -- Apply settings
-function TranqRotate:applySettings()
+function CombRotate:applySettings()
 
-    TranqRotate.mainFrame:ClearAllPoints()
+    CombRotate.mainFrame:ClearAllPoints()
 
-    local config = TranqRotate.db.profile
+    local config = CombRotate.db.profile
     if config.point then
-        TranqRotate.mainFrame:SetPoint(config.point, UIParent, 'BOTTOMLEFT', config.x, config.y)
+        CombRotate.mainFrame:SetPoint(config.point, UIParent, 'BOTTOMLEFT', config.x, config.y)
     else
-        TranqRotate.mainFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        CombRotate.mainFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     end
 
-    TranqRotate.mainFrame:EnableMouse(not TranqRotate.db.profile.lock)
-    TranqRotate.mainFrame:SetMovable(not TranqRotate.db.profile.lock)
+    CombRotate.mainFrame:EnableMouse(not CombRotate.db.profile.lock)
+    CombRotate.mainFrame:SetMovable(not CombRotate.db.profile.lock)
 end
 
 -- Print wrapper, just in case
-function TranqRotate:printMessage(msg)
+function CombRotate:printMessage(msg)
     print(msg)
 end
 
 -- Print message with colored prefix
-function TranqRotate:printPrefixedMessage(msg)
-    TranqRotate:printMessage(TranqRotate:colorText(TranqRotate.constants.printPrefix) .. msg)
+function CombRotate:printPrefixedMessage(msg)
+    CombRotate:printMessage(CombRotate:colorText(CombRotate.constants.printPrefix) .. msg)
 end
 
 -- Print message with colored prefix
-function TranqRotate:debug(...)
-    print("TranqRotate", "DEBUG", ...)
+function CombRotate:debug(...)
+    print("CombRotate", "DEBUG", ...)
 end
 
--- Send a tranq announce message to a given channel
-function TranqRotate:sendAnnounceMessage(chatMessage)
-    if TranqRotate.db.profile.enableAnnounces then
+-- Send a combustion announce message to a given channel
+function CombRotate:sendAnnounceMessage(chatMessage)
+    if CombRotate.db.profile.enableAnnounces then
         -- Prints instead to avoid lua error in open world with say and yell
         if (
             not IsInInstance() and
-            (TranqRotate.db.profile.channelType == "SAY" or TranqRotate.db.profile.channelType == "YELL")
+            (CombRotate.db.profile.channelType == "SAY" or CombRotate.db.profile.channelType == "YELL")
         ) then
-            TranqRotate:printPrefixedMessage(chatMessage .. " " .. L["YELL_SAY_DISABLED_OPEN_WORLD"])
+            CombRotate:printPrefixedMessage(chatMessage .. " " .. L["YELL_SAY_DISABLED_OPEN_WORLD"])
             return
         end
 
-        TranqRotate:sendMessage(
+        CombRotate:sendMessage(
             chatMessage,
-            TranqRotate.db.profile.channelType,
-            TranqRotate.db.profile.targetChannel
+            CombRotate.db.profile.channelType,
+            CombRotate.db.profile.targetChannel
         )
     end
 end
 
 -- Send a rotation broadcast message
-function TranqRotate:sendRotationSetupBroadcastMessage(message)
-    TranqRotate:sendMessage(
+function CombRotate:sendRotationSetupBroadcastMessage(message)
+    CombRotate:sendMessage(
         message,
-        TranqRotate.db.profile.rotationReportChannelType,
-        TranqRotate.db.profile.setupBroadcastTargetChannel
+        CombRotate.db.profile.rotationReportChannelType,
+        CombRotate.db.profile.setupBroadcastTargetChannel
     )
 end
 
 -- Send a message to a given channel
-function TranqRotate:sendMessage(message, channelType, targetChannel)
+function CombRotate:sendMessage(message, channelType, targetChannel)
     local channelNumber
     if channelType == "CHANNEL" then
         channelNumber = GetChannelName(targetChannel)
@@ -112,196 +112,182 @@ function TranqRotate:sendMessage(message, channelType, targetChannel)
     SendChatMessage(message, channelType, nil, channelNumber or targetChannel)
 end
 
-SLASH_TRANQROTATE1 = "/tranq"
-SLASH_TRANQROTATE2 = "/tranqrotate"
-SlashCmdList["TRANQROTATE"] = function(msg)
+SLASH_COMBROTATE1 = "/comb"
+SLASH_COMBROTATE2 = "/combrotate"
+SlashCmdList["COMBROTATE"] = function(msg)
     local _, _, cmd, args = string.find(msg, "%s?(%w+)%s?(.*)")
 
     if (cmd == 'toggle') then
-        TranqRotate:toggleDisplay()
+        CombRotate:toggleDisplay()
     elseif (cmd == 'lock') then
-        TranqRotate:lock(true)
+        CombRotate:lock(true)
     elseif (cmd == 'unlock') then
-        TranqRotate:lock(false)
+        CombRotate:lock(false)
     elseif (cmd == 'backup') then
-        TranqRotate:alertBackup(TranqRotate.db.profile.unableToTranqMessage)
+        CombRotate:alertBackup(CombRotate.db.profile.unableToCombMessage)
     elseif (cmd == 'rotate') then -- @todo decide if this should be removed or not (Used in runDemo)
-        TranqRotate:testRotation()
+        CombRotate:testRotation()
     elseif (cmd == 'test') then
-        TranqRotate:toggleArcaneShotTesting()
+        CombRotate:toggleFireBlastTesting()
     elseif (cmd == 'report') then
-        TranqRotate:printRotationSetup()
+        CombRotate:printRotationSetup()
     elseif (cmd == 'settings') then
-        TranqRotate:openSettings()
+        CombRotate:openSettings()
     elseif (cmd == 'check') then
-        TranqRotate:checkVersions()
+        CombRotate:checkVersions()
     else
-        TranqRotate:printHelp()
+        CombRotate:printHelp()
     end
 end
 
-function TranqRotate:toggleDisplay()
-    if (TranqRotate.mainFrame:IsShown()) then
-        TranqRotate.mainFrame:Hide()
-        TranqRotate:printMessage(L['TRANQ_WINDOW_HIDDEN'])
+function CombRotate:toggleDisplay()
+    if (CombRotate.mainFrame:IsShown()) then
+        CombRotate.mainFrame:Hide()
+        CombRotate:printMessage(L['COMB_WINDOW_HIDDEN'])
     else
-        TranqRotate.mainFrame:Show()
+        CombRotate.mainFrame:Show()
     end
 end
 
 -- Open ace settings
-function TranqRotate:openSettings()
+function CombRotate:openSettings()
     local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-    AceConfigDialog:Open("TranqRotate")
+    AceConfigDialog:Open("CombustionRotate")
 end
 
 -- Sends rotation setup to raid channel
-function TranqRotate:printRotationSetup()
+function CombRotate:printRotationSetup()
 
     if (IsInRaid()) then
-        TranqRotate:sendRotationSetupBroadcastMessage('--- ' .. TranqRotate.constants.printPrefix .. L['BROADCAST_HEADER_TEXT'] .. ' ---')
+        CombRotate:sendRotationSetupBroadcastMessage('--- ' .. CombRotate.constants.printPrefix .. L['BROADCAST_HEADER_TEXT'] .. ' ---')
 
-        if (TranqRotate.db.profile.useMultilineRotationReport) then
-            TranqRotate:printMultilineRotation(TranqRotate.rotationTables.rotation)
+        if (CombRotate.db.profile.useMultilineRotationReport) then
+            CombRotate:printMultilineRotation(CombRotate.rotationTables.rotation)
         else
-            TranqRotate:sendRotationSetupBroadcastMessage(
-                TranqRotate:buildGroupMessage(L['BROADCAST_ROTATION_PREFIX'] .. ' : ', TranqRotate.rotationTables.rotation)
+            CombRotate:sendRotationSetupBroadcastMessage(
+                CombRotate:buildGroupMessage(L['BROADCAST_ROTATION_PREFIX'] .. ' : ', CombRotate.rotationTables.rotation)
             )
         end
 
-        if (#TranqRotate.rotationTables.backup > 0) then
-            TranqRotate:sendRotationSetupBroadcastMessage(
-                TranqRotate:buildGroupMessage(L['BROADCAST_BACKUP_PREFIX'] .. ' : ', TranqRotate.rotationTables.backup)
+        if (#CombRotate.rotationTables.backup > 0) then
+            CombRotate:sendRotationSetupBroadcastMessage(
+                CombRotate:buildGroupMessage(L['BROADCAST_BACKUP_PREFIX'] .. ' : ', CombRotate.rotationTables.backup)
             )
         end
     end
 end
 
 -- Print the main rotation on multiple lines
-function TranqRotate:printMultilineRotation(rotationTable, channel)
+function CombRotate:printMultilineRotation(rotationTable, channel)
     local position = 1;
-    for key, hunt in pairs(rotationTable) do
-        TranqRotate:sendRotationSetupBroadcastMessage(tostring(position) .. ' - ' .. hunt.name)
+    for key, mage in pairs(rotationTable) do
+        CombRotate:sendRotationSetupBroadcastMessage(tostring(position) .. ' - ' .. mage.name)
         position = position + 1;
     end
 end
 
--- Serialize hunters names of a given rotation group
-function TranqRotate:buildGroupMessage(prefix, rotationTable)
-    local hunters = {}
+-- Serialize mage names of a given rotation group
+function CombRotate:buildGroupMessage(prefix, rotationTable)
+    local mages = {}
 
-    for key, hunt in pairs(rotationTable) do
-        table.insert(hunters, TranqRotate:formatPlayerName(hunt.name))
+    for key, mage in pairs(rotationTable) do
+        table.insert(mages, CombRotate:formatPlayerName(mage.name))
     end
 
-    return prefix .. table.concat(hunters, ', ')
+    return prefix .. table.concat(mages, ', ')
 end
 
 -- Print command options to chat
-function TranqRotate:printHelp()
+function CombRotate:printHelp()
     local spacing = '   '
-    TranqRotate:printMessage(TranqRotate:colorText('/tranqrotate') .. ' commands options :')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('toggle') .. ' : Show/Hide the main window')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('lock') .. ' : Lock the main window position')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('unlock') .. ' : Unlock the main window position')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('settings') .. ' : Open TranqRotate settings')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('report') .. ' : Prints the rotation setup to the configured channel')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('backup') .. ' : Whispers backup hunters to immediately tranq')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('check') .. ' : Prints users version of TranqRotate')
-    TranqRotate:printMessage(spacing .. TranqRotate:colorText('test') .. ' : Toggle test mode')
+    CombRotate:printMessage(CombRotate:colorText('/combrotate') .. ' commands options :')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('toggle') .. ' : Show/Hide the main window')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('lock') .. ' : Lock the main window position')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('unlock') .. ' : Unlock the main window position')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('settings') .. ' : Open CombustionRotate settings')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('report') .. ' : Prints the rotation setup to the configured channel')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('backup') .. ' : Whispers backup mages to immediately use combustion')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('check') .. ' : Prints users version of CombustionRotate')
+    CombRotate:printMessage(spacing .. CombRotate:colorText('test') .. ' : Toggle test mode')
 end
 
 -- Adds color to given text
-function TranqRotate:colorText(text)
+function CombRotate:colorText(text)
     return '|cffffbf00' .. text .. '|r'
 end
 
--- Toggle arcane shot testing mode
-function TranqRotate:toggleArcaneShotTesting(disable)
+-- Toggle fire blast testing mode
+function CombRotate:toggleFireBlastTesting(disable)
 
-    if (not disable and not TranqRotate.testMode) then
-        TranqRotate:printPrefixedMessage(L['ARCANE_SHOT_TESTING_ENABLED'])
-        TranqRotate.testMode = true
+    if (not disable and not CombRotate.testMode) then
+        CombRotate:printPrefixedMessage(L['FIRE_BLAST_TESTING_ENABLED'])
+        CombRotate.testMode = true
 
         -- Disable testing after 10 minutes
         C_Timer.After(600, function()
-            TranqRotate:toggleArcaneShotTesting(true)
+            CombRotate:toggleFireBlastTesting(true)
         end)
     else
-        TranqRotate.testMode = false
-        TranqRotate:printPrefixedMessage(L['ARCANE_SHOT_TESTING_DISABLED'])
+        CombRotate.testMode = false
+        CombRotate:printPrefixedMessage(L['FIRE_BLAST_TESTING_DISABLED'])
     end
 end
 
 -- Update the addon version of a given player
-function TranqRotate:updatePlayerAddonVersion(player, version)
-    TranqRotate.addonVersions[player] = version
+function CombRotate:updatePlayerAddonVersion(player, version)
+    CombRotate.addonVersions[player] = version
 
-    local hunter = TranqRotate:getHunter(player)
-    if (hunter) then
-        TranqRotate:updateBlindIcon(hunter)
+    local mage = CombRotate:getMage(player)
+    if (mage) then
+        CombRotate:updateBlindIcon(mage)
     end
 
-    local updateRequired, breakingUpdate = TranqRotate:isUpdateRequired(version)
+    local updateRequired, breakingUpdate = CombRotate:isUpdateRequired(version)
     if (updateRequired) then
-        TranqRotate:notifyUserAboutAvailableUpdate(breakingUpdate)
+        CombRotate:notifyUserAboutAvailableUpdate(breakingUpdate)
     end
 end
 
--- Prints to the chat the addon version of every hunter and addon users
-function TranqRotate:checkVersions()
-    TranqRotate:printPrefixedMessage("## " .. L["VERSION_CHECK_HEADER"] .. " ##")
-    TranqRotate:printPrefixedMessage(L["VERSION_CHECK_YOU"] .. " - " .. TranqRotate.version)
+-- Prints to the chat the addon version of every mage and addon users
+function CombRotate:checkVersions()
+    CombRotate:printPrefixedMessage("## " .. L["VERSION_CHECK_HEADER"] .. " ##")
+    CombRotate:printPrefixedMessage(L["VERSION_CHECK_YOU"] .. " - " .. CombRotate.version)
 
-    for player, version in pairs(TranqRotate.addonVersions) do
+    for player, version in pairs(CombRotate.addonVersions) do
         if (player ~= UnitName("player")) then
-            TranqRotate:printPrefixedMessage(TranqRotate:formatPlayerName(player) .. " - " .. TranqRotate:formatAddonVersion(version))
+            CombRotate:printPrefixedMessage(CombRotate:formatPlayerName(player) .. " - " .. CombRotate:formatAddonVersion(version))
         end
     end
 end
 
 -- Removes players that left the raid from version table
-function TranqRotate:purgeAddonVersions()
-    for player, version in pairs(TranqRotate.addonVersions) do
+function CombRotate:purgeAddonVersions()
+    for player, version in pairs(CombRotate.addonVersions) do
         if (not UnitInParty(player)) then
-            TranqRotate.addonVersions[player] = nil
+            CombRotate.addonVersions[player] = nil
         end
     end
 end
 
--- Returns a string based on the hunter addon version
-function TranqRotate:formatAddonVersion(version)
+-- Returns a string based on the mage addon version
+function CombRotate:formatAddonVersion(version)
     if (version == nil) then
-        return L["VERSION_CHECK_NONE_OR_BELOW_1.6.0"]
+        return L["VERSION_CHECK_NONE_OR_BELOW_1.0.0"]
     else
         return version
     end
 end
 
--- Prints in the chat the reason a tranqshot has failed
-function TranqRotate:printFail(hunter, event)
-
-    local name = TranqRotate:formatPlayerName(hunter.name)
-    if (event == "SPELL_MISSED") then
-        TranqRotate:printPrefixedMessage(string.format(L['PRINT_FAILED_TRANQ_MISS'], name))-- .. " missed his tranqshot!")
-    elseif(event == "SPELL_DISPEL_FAILED") then
-        TranqRotate:printPrefixedMessage(string.format(L['PRINT_FAILED_TRANQ_RESIST'], name))-- .. " missed his tranqshot!")
-    else
-        -- v1.5.1 and older do not send the event type
-        TranqRotate:printPrefixedMessage(string.format(L['PRINT_FAILED_TRANQ_MISS_OR_RESIST'], name))-- .. " missed his tranqshot!")
-    end
-end
-
 -- Demo rotation to record documentation gifs / screens
-function TranqRotate:runDemo()
+function CombRotate:runDemo()
     C_Timer.NewTicker(
         10.5,
         function()
-            TranqRotate:startBossFrenzyCooldown(10)
+            CombRotate:startBossFrenzyCooldown(10)
             C_Timer.After(
                  1,
                 function()
-                    TranqRotate:testRotation()
+                    CombRotate:testRotation()
                 end
             )
         end,
@@ -311,7 +297,7 @@ end
 
 -- Parse version string
 -- @return major, minor, fix, isStable
-function TranqRotate:parseVersionString(versionString)
+function CombRotate:parseVersionString(versionString)
 
     local version, versionType = strsplit("-", versionString)
     local major, minor, fix = strsplit( ".", version)
@@ -321,12 +307,12 @@ end
 
 -- Check if the given version would require updating
 -- @return requireUpdate, breakingUpdate
-function TranqRotate:isUpdateRequired(versionString)
+function CombRotate:isUpdateRequired(versionString)
 
     if (nil == versionString) then return false, false end
 
     local remoteMajor, remoteMinor, remoteFix, isRemoteStable = self:parseVersionString(versionString)
-    local localMajor, localMinor, localFix, isLocalStable = self:parseVersionString(TranqRotate.version)
+    local localMajor, localMinor, localFix, isLocalStable = self:parseVersionString(CombRotate.version)
 
     if (isRemoteStable) then
 
@@ -351,16 +337,16 @@ function TranqRotate:isUpdateRequired(versionString)
 end
 
 -- Notify user about a new version available
-function TranqRotate:notifyUserAboutAvailableUpdate(isBreakingUpdate)
+function CombRotate:notifyUserAboutAvailableUpdate(isBreakingUpdate)
     if (isBreakingUpdate) then
-        if (TranqRotate.notifiedBreakingUpdate ~= true) then
-            TranqRotate:printPrefixedMessage('|cffff3d3d' .. L['BREAKING_UPDATE_AVAILABLE'] .. '|r')
-            TranqRotate.notifiedBreakingUpdate = true
+        if (CombRotate.notifiedBreakingUpdate ~= true) then
+            CombRotate:printPrefixedMessage('|cffff3d3d' .. L['BREAKING_UPDATE_AVAILABLE'] .. '|r')
+            CombRotate.notifiedBreakingUpdate = true
         end
     else
-        if (TranqRotate.notifiedUpdate ~= true and TranqRotate.notifiedBreakingUpdate ~= true) then
-            TranqRotate:printPrefixedMessage(L['UPDATE_AVAILABLE'])
-            TranqRotate.notifiedUpdate = true
+        if (CombRotate.notifiedUpdate ~= true and CombRotate.notifiedBreakingUpdate ~= true) then
+            CombRotate:printPrefixedMessage(L['UPDATE_AVAILABLE'])
+            CombRotate.notifiedUpdate = true
         end
     end
 end

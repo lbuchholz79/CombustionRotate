@@ -1,43 +1,43 @@
 local AceComm = LibStub("AceComm-3.0")
 local AceSerializer = LibStub("AceSerializer-3.0")
 
-local L = TranqRotate.L
+local L = CombRotate.L
 
 -- Register comm prefix at initialization steps
-function TranqRotate:initComms()
+function CombRotate:initComms()
 
-    TranqRotate.syncVersion = 0
-    TranqRotate.syncLastSender = ''
+    CombRotate.syncVersion = 0
+    CombRotate.syncLastSender = ''
 
-    AceComm:RegisterComm(TranqRotate.constants.commsPrefix, TranqRotate.OnCommReceived)
+    AceComm:RegisterComm(CombRotate.constants.commsPrefix, CombRotate.OnCommReceived)
 end
 
 -- Handle message reception and
-function TranqRotate.OnCommReceived(prefix, data, channel, sender)
+function CombRotate.OnCommReceived(prefix, data, channel, sender)
 
     if not UnitIsUnit('player', sender) then
 
         local success, message = AceSerializer:Deserialize(data)
 
         if (success) then
-            if (message.type == TranqRotate.constants.commsTypes.tranqshotDone) then
-                TranqRotate:receiveSyncTranq(prefix, message, channel, sender)
-            elseif (message.type == TranqRotate.constants.commsTypes.syncOrder) then
-                TranqRotate:receiveSyncOrder(prefix, message, channel, sender)
-            elseif (message.type == TranqRotate.constants.commsTypes.syncRequest) then
-                TranqRotate:receiveSyncRequest(prefix, message, channel, sender)
-            elseif (message.type == TranqRotate.constants.commsTypes.backupRequest) then
-                TranqRotate:receiveBackupRequest(prefix, message, channel, sender)
-            elseif (message.type == TranqRotate.constants.commsTypes.reset) then
-                TranqRotate:receiveResetRequest(prefix, message, channel, sender)
+            if (message.type == CombRotate.constants.commsTypes.combDone) then
+                CombRotate:receiveSyncComb(prefix, message, channel, sender)
+            elseif (message.type == CombRotate.constants.commsTypes.syncOrder) then
+                CombRotate:receiveSyncOrder(prefix, message, channel, sender)
+            elseif (message.type == CombRotate.constants.commsTypes.syncRequest) then
+                CombRotate:receiveSyncRequest(prefix, message, channel, sender)
+            elseif (message.type == CombRotate.constants.commsTypes.backupRequest) then
+                CombRotate:receiveBackupRequest(prefix, message, channel, sender)
+            elseif (message.type == CombRotate.constants.commsTypes.reset) then
+                CombRotate:receiveResetRequest(prefix, message, channel, sender)
             end
         end
     end
 end
 
 -- Checks if a given version from a given sender should be applied
-function TranqRotate:isVersionEligible(version, sender)
-    return version > TranqRotate.syncVersion or (version == TranqRotate.syncVersion and sender < TranqRotate.syncLastSender)
+function CombRotate:isVersionEligible(version, sender)
+    return version > CombRotate.syncVersion or (version == CombRotate.syncVersion and sender < CombRotate.syncLastSender)
 end
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -45,19 +45,19 @@ end
 -----------------------------------------------------------------------------------------------------------------------
 
 -- Proxy to send raid addon message
-function TranqRotate:sendRaidAddonMessage(message)
-    TranqRotate:sendAddonMessage(message, TranqRotate.constants.commsChannel)
+function CombRotate:sendRaidAddonMessage(message)
+    CombRotate:sendAddonMessage(message, CombRotate.constants.commsChannel)
 end
 
 -- Proxy to send whisper addon message
-function TranqRotate:sendWhisperAddonMessage(message, name)
-    TranqRotate:sendAddonMessage(message, 'WHISPER', name)
+function CombRotate:sendWhisperAddonMessage(message, name)
+    CombRotate:sendAddonMessage(message, 'WHISPER', name)
 end
 
 -- Broadcast a given message to the commsChannel with the commsPrefix
-function TranqRotate:sendAddonMessage(message, channel, name)
+function CombRotate:sendAddonMessage(message, channel, name)
     AceComm:SendCommMessage(
-        TranqRotate.constants.commsPrefix,
+        CombRotate.constants.commsPrefix,
         AceSerializer:Serialize(message),
         channel,
         name
@@ -68,145 +68,143 @@ end
 -- OUTPUT
 -----------------------------------------------------------------------------------------------------------------------
 
--- Broadcast a tranqshot event
-function TranqRotate:sendSyncTranq(hunter, fail, timestamp, failEvent)
+-- Broadcast a combustion event
+function CombRotate:sendSyncComb(mage, fail, timestamp, failEvent)
     local message = {
-        ['type'] = TranqRotate.constants.commsTypes.tranqshotDone,
+        ['type'] = CombRotate.constants.commsTypes.combDone,
         ['timestamp'] = timestamp,
-        ['player'] = hunter.GUID,
+        ['player'] = mage.GUID,
         ['fail'] = fail,
         ['failEvent'] = failEvent,
     }
 
-    TranqRotate:sendRaidAddonMessage(message)
+    CombRotate:sendRaidAddonMessage(message)
 end
 
 -- Broadcast current rotation configuration
-function TranqRotate:sendSyncOrder(whisper, name)
+function CombRotate:sendSyncOrder(whisper, name)
 
-    TranqRotate.syncVersion = TranqRotate.syncVersion + 1
-    TranqRotate.syncLastSender = UnitName("player")
+    CombRotate.syncVersion = CombRotate.syncVersion + 1
+    CombRotate.syncLastSender = UnitName("player")
 
     local message = {
-        ['type'] = TranqRotate.constants.commsTypes.syncOrder,
-        ['version'] = TranqRotate.syncVersion,
-        ['rotation'] = TranqRotate:getSimpleRotationTables(),
-        ['addonVersion'] = TranqRotate.version,
+        ['type'] = CombRotate.constants.commsTypes.syncOrder,
+        ['version'] = CombRotate.syncVersion,
+        ['rotation'] = CombRotate:getSimpleRotationTables(),
+        ['addonVersion'] = CombRotate.version,
     }
 
-    local nextHunter = TranqRotate:getHighlightedHunter()
-    if (nil ~= nextHunter) then
-        message.nextHunter = nextHunter.GUID
+    local nextMage = CombRotate:getHighlightedMage()
+    if (nil ~= nextMage) then
+        message.nextMage = nextMage.GUID
     end
 
     if (whisper) then
-        TranqRotate:sendWhisperAddonMessage(message, name)
+        CombRotate:sendWhisperAddonMessage(message, name)
     else
-        TranqRotate:sendRaidAddonMessage(message, name)
+        CombRotate:sendRaidAddonMessage(message, name)
     end
 end
 
 -- Broadcast a request for the current rotation configuration
-function TranqRotate:sendSyncOrderRequest()
+function CombRotate:sendSyncOrderRequest()
 
     local message = {
-        ['type'] = TranqRotate.constants.commsTypes.syncRequest,
-        ['addonVersion'] = TranqRotate.version,
+        ['type'] = CombRotate.constants.commsTypes.syncRequest,
+        ['addonVersion'] = CombRotate.version,
     }
 
-    TranqRotate:sendRaidAddonMessage(message)
+    CombRotate:sendRaidAddonMessage(message)
 end
 
 -- Broadcast a request for the current rotation configuration
-function TranqRotate:sendBackupRequest(name)
+function CombRotate:sendBackupRequest(name)
 
-    TranqRotate:printPrefixedMessage(string.format(L['COMMS_SENT_BACKUP_REQUEST'], TranqRotate:formatPlayerName(name)))
+    CombRotate:printPrefixedMessage(string.format(L['COMMS_SENT_BACKUP_REQUEST'], CombRotate:formatPlayerName(name)))
 
     local message = {
-        ['type'] = TranqRotate.constants.commsTypes.backupRequest,
+        ['type'] = CombRotate.constants.commsTypes.backupRequest,
     }
 
-    TranqRotate:sendWhisperAddonMessage(message, name)
+    CombRotate:sendWhisperAddonMessage(message, name)
 end
 
 -- Broadcast a reset of the rotation to other players
-function TranqRotate:sendResetBroadcast()
+function CombRotate:sendResetBroadcast()
 
     local message = {
-        ['type'] = TranqRotate.constants.commsTypes.reset,
+        ['type'] = CombRotate.constants.commsTypes.reset,
     }
 
-    TranqRotate:sendRaidAddonMessage(message)
+    CombRotate:sendRaidAddonMessage(message)
 end
 
 -----------------------------------------------------------------------------------------------------------------------
 -- INPUT
 -----------------------------------------------------------------------------------------------------------------------
 
--- Tranqshot event received
-function TranqRotate:receiveSyncTranq(prefix, message, channel, sender)
+-- Combustion event received
+function CombRotate:receiveSyncComb(prefix, message, channel, sender)
 
-    local hunter = TranqRotate:getHunter(message.player)
+    local mage = CombRotate:getMage(message.player)
 
-    if (hunter == nil) then
+    if (mage == nil) then
         return
     end
 
     if (not message.fail) then
-        local notDuplicate = hunter.lastTranqTime <  GetTime() - TranqRotate.constants.duplicateTranqshotDelayThreshold
+        local notDuplicate = mage.lastCombTime <  GetTime() - CombRotate.constants.duplicateCombustionDelayThreshold
         if (notDuplicate) then
-            TranqRotate:rotate(hunter)
+            CombRotate:rotate(mage)
         end
-    else
-        TranqRotate:handleFailTranq(hunter, message.failEvent)
     end
 end
 
 -- Rotation configuration received
-function TranqRotate:receiveSyncOrder(prefix, message, channel, sender)
+function CombRotate:receiveSyncOrder(prefix, message, channel, sender)
 
-    TranqRotate:updateRaidStatus()
+    CombRotate:updateRaidStatus()
 
-    if (TranqRotate:isVersionEligible(message.version, sender)) then
-        TranqRotate.syncVersion = (message.version)
-        TranqRotate.syncLastSender = sender
+    if (CombRotate:isVersionEligible(message.version, sender)) then
+        CombRotate.syncVersion = (message.version)
+        CombRotate.syncLastSender = sender
 
-        TranqRotate:printPrefixedMessage(string.format(L['COMMS_RECEIVED_NEW_ROTATION'], TranqRotate:formatPlayerName(sender)))
+        CombRotate:printPrefixedMessage(string.format(L['COMMS_RECEIVED_NEW_ROTATION'], CombRotate:formatPlayerName(sender)))
 
-        TranqRotate:applyRotationConfiguration(message.rotation)
+        CombRotate:applyRotationConfiguration(message.rotation)
 
-        local nextHunter = TranqRotate:getHunter(message.nextHunter)
-        if (nil ~= nextHunter) then
-            TranqRotate:setNextTranq(nextHunter)
+        local nextMage = CombRotate:getMage(message.nextMage)
+        if (nil ~= nextMage) then
+            CombRotate:setNextComb(nextMage)
         end
     end
 
-    TranqRotate:updatePlayerAddonVersion(sender, message.addonVersion)
+    CombRotate:updatePlayerAddonVersion(sender, message.addonVersion)
 end
 
 -- Request to send current roration configuration received
-function TranqRotate:receiveSyncRequest(prefix, message, channel, sender)
-    TranqRotate:updatePlayerAddonVersion(sender, message.addonVersion)
-    TranqRotate:sendSyncOrder(true, sender)
+function CombRotate:receiveSyncRequest(prefix, message, channel, sender)
+    CombRotate:updatePlayerAddonVersion(sender, message.addonVersion)
+    CombRotate:sendSyncOrder(true, sender)
 end
 
 -- Received a backup request
-function TranqRotate:receiveBackupRequest(prefix, message, channel, sender)
-    TranqRotate:printPrefixedMessage(string.format(L['COMMS_RECEIVED_BACKUP_REQUEST'], TranqRotate:formatPlayerName(sender)))
+function CombRotate:receiveBackupRequest(prefix, message, channel, sender)
+    CombRotate:printPrefixedMessage(string.format(L['COMMS_RECEIVED_BACKUP_REQUEST'], CombRotate:formatPlayerName(sender)))
 
-    TranqRotate:throwTranqAlert()
+    CombRotate:throwCombAlert()
 end
 
 -- Received a rotation reset request
-function TranqRotate:receiveResetRequest(prefix, message, channel, sender)
+function CombRotate:receiveResetRequest(prefix, message, channel, sender)
 
-    if (not TranqRotate:isUnitAllowedToManageRotation(sender)) then
+    if (not CombRotate:isUnitAllowedToManageRotation(sender)) then
         return
     end
 
-    if (TranqRotate.lastRotationReset < GetTime() - 2) then
-        TranqRotate:printPrefixedMessage(string.format(L['COMMS_RECEIVED_RESET_BROADCAST'], TranqRotate:formatPlayerName(sender)))
+    if (CombRotate.lastRotationReset < GetTime() - 2) then
+        CombRotate:printPrefixedMessage(string.format(L['COMMS_RECEIVED_RESET_BROADCAST'], CombRotate:formatPlayerName(sender)))
 
-        TranqRotate:resetRotation()
+        CombRotate:resetRotation()
     end
 end

@@ -1,80 +1,80 @@
-local L = TranqRotate.L
+local L = CombRotate.L
 
 -- Create main window
-function TranqRotate:createMainFrame()
-    TranqRotate.mainFrame = CreateFrame("Frame", 'mainFrame', UIParent)
-    TranqRotate.mainFrame:SetWidth(TranqRotate.constants.mainFrameWidth)
-    TranqRotate.mainFrame:SetHeight(TranqRotate.constants.rotationFramesBaseHeight * 2 + TranqRotate.constants.titleBarHeight)
-    TranqRotate.mainFrame:Show()
+function CombRotate:createMainFrame()
+    CombRotate.mainFrame = CreateFrame("Frame", 'mainFrame', UIParent)
+    CombRotate.mainFrame:SetWidth(CombRotate.constants.mainFrameWidth)
+    CombRotate.mainFrame:SetHeight(CombRotate.constants.rotationFramesBaseHeight * 2 + CombRotate.constants.titleBarHeight)
+    CombRotate.mainFrame:Show()
 
-    TranqRotate.mainFrame:RegisterForDrag("LeftButton")
-    TranqRotate.mainFrame:SetClampedToScreen(true)
-    TranqRotate.mainFrame:SetScript("OnDragStart", function() TranqRotate.mainFrame:StartMoving() end)
+    CombRotate.mainFrame:RegisterForDrag("LeftButton")
+    CombRotate.mainFrame:SetClampedToScreen(true)
+    CombRotate.mainFrame:SetScript("OnDragStart", function() CombRotate.mainFrame:StartMoving() end)
 
-    TranqRotate.mainFrame:SetScript(
+    CombRotate.mainFrame:SetScript(
         "OnDragStop",
         function()
-            TranqRotate.mainFrame:StopMovingOrSizing()
+            CombRotate.mainFrame:StopMovingOrSizing()
 
-            TranqRotate.db.profile.point = 'TOPLEFT'
-            TranqRotate.db.profile.y = TranqRotate.mainFrame:GetTop()
-            TranqRotate.db.profile.x = TranqRotate.mainFrame:GetLeft()
+            CombRotate.db.profile.point = 'TOPLEFT'
+            CombRotate.db.profile.y = CombRotate.mainFrame:GetTop()
+            CombRotate.db.profile.x = CombRotate.mainFrame:GetLeft()
         end
     )
 end
 
-function TranqRotate:resetMainWindowPosition()
-    TranqRotate.db.profile.point = nil
-    TranqRotate.db.profile.y = nil
-    TranqRotate.db.profile.x = nil
+function CombRotate:resetMainWindowPosition()
+    CombRotate.db.profile.point = nil
+    CombRotate.db.profile.y = nil
+    CombRotate.db.profile.x = nil
 
-    TranqRotate.mainFrame:ClearAllPoints()
-    TranqRotate.mainFrame:SetPoint('CENTER')
+    CombRotate.mainFrame:ClearAllPoints()
+    CombRotate.mainFrame:SetPoint('CENTER')
 end
 
 -- Create Title frame
-function TranqRotate:createTitleFrame()
-    TranqRotate.mainFrame.titleFrame = CreateFrame("Frame", 'rotationFrame', TranqRotate.mainFrame)
-    TranqRotate.mainFrame.titleFrame:SetPoint('TOPLEFT')
-    TranqRotate.mainFrame.titleFrame:SetPoint('TOPRIGHT')
-    TranqRotate.mainFrame.titleFrame:SetHeight(TranqRotate.constants.titleBarHeight)
+function CombRotate:createTitleFrame()
+    CombRotate.mainFrame.titleFrame = CreateFrame("Frame", 'rotationFrame', CombRotate.mainFrame)
+    CombRotate.mainFrame.titleFrame:SetPoint('TOPLEFT')
+    CombRotate.mainFrame.titleFrame:SetPoint('TOPRIGHT')
+    CombRotate.mainFrame.titleFrame:SetHeight(CombRotate.constants.titleBarHeight)
 
-    TranqRotate.mainFrame.titleFrame.texture = TranqRotate.mainFrame.titleFrame:CreateTexture(nil, "BACKGROUND")
-    TranqRotate.mainFrame.titleFrame.texture:SetColorTexture(TranqRotate.colors.darkGreen:GetRGB())
-    TranqRotate.mainFrame.titleFrame.texture:SetAllPoints()
+    CombRotate.mainFrame.titleFrame.texture = CombRotate.mainFrame.titleFrame:CreateTexture(nil, "BACKGROUND")
+    CombRotate.mainFrame.titleFrame.texture:SetColorTexture(CombRotate.colors.darkGreen:GetRGB())
+    CombRotate.mainFrame.titleFrame.texture:SetAllPoints()
 
-    TranqRotate.mainFrame.titleFrame.text = TranqRotate.mainFrame.titleFrame:CreateFontString(nil, "ARTWORK")
-    TranqRotate.mainFrame.titleFrame.text:SetFont("Fonts\\ARIALN.ttf", 12)
-    TranqRotate.mainFrame.titleFrame.text:SetShadowColor(0,0,0,0.5)
-    TranqRotate.mainFrame.titleFrame.text:SetShadowOffset(1,-1)
-    TranqRotate.mainFrame.titleFrame.text:SetPoint("LEFT",5,0)
-    TranqRotate.mainFrame.titleFrame.text:SetText('TranqRotate')
-    TranqRotate.mainFrame.titleFrame.text:SetTextColor(1,1,1,1)
+    CombRotate.mainFrame.titleFrame.text = CombRotate.mainFrame.titleFrame:CreateFontString(nil, "ARTWORK")
+    CombRotate.mainFrame.titleFrame.text:SetFont("Fonts\\ARIALN.ttf", 12)
+    CombRotate.mainFrame.titleFrame.text:SetShadowColor(0,0,0,0.5)
+    CombRotate.mainFrame.titleFrame.text:SetShadowOffset(1,-1)
+    CombRotate.mainFrame.titleFrame.text:SetPoint("LEFT",5,0)
+    CombRotate.mainFrame.titleFrame.text:SetText('CombustionRotate')
+    CombRotate.mainFrame.titleFrame.text:SetTextColor(1,1,1,1)
 end
 
 -- Create title bar buttons
-function TranqRotate:createButtons()
+function CombRotate:createButtons()
 
     local buttons = {
         {
             texture = 'Interface/Buttons/UI-Panel-MinimizeButton-Up',
-            callback = TranqRotate.toggleDisplay,
+            callback = CombRotate.toggleDisplay,
             textCoord = {0.18, 0.8, 0.2, 0.8},
             tooltip = L['BUTTON_CLOSE'],
         },
         {
             texture = 'Interface/GossipFrame/BinderGossipIcon',
-            callback = TranqRotate.openSettings,
+            callback = CombRotate.openSettings,
             tooltip = L['BUTTON_SETTINGS'],
         },
         {
             texture = 'Interface/Buttons/UI-RefreshButton',
-            callback = TranqRotate.handleResetButton,
+            callback = CombRotate.handleResetButton,
             tooltip = L['BUTTON_RESET_ROTATION'],
         },
         {
             texture = 'Interface/Buttons/UI-GuildButton-MOTD-Up',
-            callback = TranqRotate.printRotationSetup,
+            callback = CombRotate.printRotationSetup,
             tooltip = L['BUTTON_PRINT_ROTATION'],
         },
     }
@@ -82,15 +82,15 @@ function TranqRotate:createButtons()
     local position = 5
 
     for key, button in pairs(buttons) do
-        TranqRotate:createButton(position, button.texture, button.callback, button.textCoord, button.tooltip)
+        CombRotate:createButton(position, button.texture, button.callback, button.textCoord, button.tooltip)
         position = position + 13
     end
 end
 
 -- Create a single button in the title bar
-function TranqRotate:createButton(position, texture, callback, textCoord, tooltip)
+function CombRotate:createButton(position, texture, callback, textCoord, tooltip)
 
-    local button = CreateFrame("Button", nil, TranqRotate.mainFrame.titleFrame)
+    local button = CreateFrame("Button", nil, CombRotate.mainFrame.titleFrame)
     button:SetPoint('RIGHT', -position, 0)
     button:SetWidth(10)
     button:SetHeight(10)
@@ -125,78 +125,78 @@ function TranqRotate:createButton(position, texture, callback, textCoord, toolti
 end
 
 -- Create rotation frame
-function TranqRotate:createRotationFrame()
-    TranqRotate.mainFrame.rotationFrame = CreateFrame("Frame", 'rotationFrame', TranqRotate.mainFrame)
-    TranqRotate.mainFrame.rotationFrame:SetPoint('LEFT')
-    TranqRotate.mainFrame.rotationFrame:SetPoint('RIGHT')
-    TranqRotate.mainFrame.rotationFrame:SetPoint('TOP', 0, -TranqRotate.constants.titleBarHeight)
-    TranqRotate.mainFrame.rotationFrame:SetHeight(TranqRotate.constants.rotationFramesBaseHeight)
+function CombRotate:createRotationFrame()
+    CombRotate.mainFrame.rotationFrame = CreateFrame("Frame", 'rotationFrame', CombRotate.mainFrame)
+    CombRotate.mainFrame.rotationFrame:SetPoint('LEFT')
+    CombRotate.mainFrame.rotationFrame:SetPoint('RIGHT')
+    CombRotate.mainFrame.rotationFrame:SetPoint('TOP', 0, -CombRotate.constants.titleBarHeight)
+    CombRotate.mainFrame.rotationFrame:SetHeight(CombRotate.constants.rotationFramesBaseHeight)
 
-    TranqRotate.mainFrame.rotationFrame.texture = TranqRotate.mainFrame.rotationFrame:CreateTexture(nil, "BACKGROUND")
-    TranqRotate.mainFrame.rotationFrame.texture:SetColorTexture(0,0,0,0.5)
-    TranqRotate.mainFrame.rotationFrame.texture:SetAllPoints()
+    CombRotate.mainFrame.rotationFrame.texture = CombRotate.mainFrame.rotationFrame:CreateTexture(nil, "BACKGROUND")
+    CombRotate.mainFrame.rotationFrame.texture:SetColorTexture(0,0,0,0.5)
+    CombRotate.mainFrame.rotationFrame.texture:SetAllPoints()
 end
 
 -- Create backup frame
-function TranqRotate:createBackupFrame()
+function CombRotate:createBackupFrame()
     -- Backup frame
-    TranqRotate.mainFrame.backupFrame = CreateFrame("Frame", 'backupFrame', TranqRotate.mainFrame)
-    TranqRotate.mainFrame.backupFrame:SetPoint('TOPLEFT', TranqRotate.mainFrame.rotationFrame, 'BOTTOMLEFT', 0, 0)
-    TranqRotate.mainFrame.backupFrame:SetPoint('TOPRIGHT', TranqRotate.mainFrame.rotationFrame, 'BOTTOMRIGHT', 0, 0)
-    TranqRotate.mainFrame.backupFrame:SetHeight(TranqRotate.constants.rotationFramesBaseHeight)
+    CombRotate.mainFrame.backupFrame = CreateFrame("Frame", 'backupFrame', CombRotate.mainFrame)
+    CombRotate.mainFrame.backupFrame:SetPoint('TOPLEFT', CombRotate.mainFrame.rotationFrame, 'BOTTOMLEFT', 0, 0)
+    CombRotate.mainFrame.backupFrame:SetPoint('TOPRIGHT', CombRotate.mainFrame.rotationFrame, 'BOTTOMRIGHT', 0, 0)
+    CombRotate.mainFrame.backupFrame:SetHeight(CombRotate.constants.rotationFramesBaseHeight)
 
     -- Set Texture
-    TranqRotate.mainFrame.backupFrame.texture = TranqRotate.mainFrame.backupFrame:CreateTexture(nil, "BACKGROUND")
-    TranqRotate.mainFrame.backupFrame.texture:SetColorTexture(0,0,0,0.5)
-    TranqRotate.mainFrame.backupFrame.texture:SetAllPoints()
+    CombRotate.mainFrame.backupFrame.texture = CombRotate.mainFrame.backupFrame:CreateTexture(nil, "BACKGROUND")
+    CombRotate.mainFrame.backupFrame.texture:SetColorTexture(0,0,0,0.5)
+    CombRotate.mainFrame.backupFrame.texture:SetAllPoints()
 
     -- Visual separator
-    TranqRotate.mainFrame.backupFrame.texture = TranqRotate.mainFrame.backupFrame:CreateTexture(nil, "BACKGROUND")
-    TranqRotate.mainFrame.backupFrame.texture:SetColorTexture(0.8,0.8,0.8,0.8)
-    TranqRotate.mainFrame.backupFrame.texture:SetHeight(1)
-    TranqRotate.mainFrame.backupFrame.texture:SetWidth(60)
-    TranqRotate.mainFrame.backupFrame.texture:SetPoint('TOP')
+    CombRotate.mainFrame.backupFrame.texture = CombRotate.mainFrame.backupFrame:CreateTexture(nil, "BACKGROUND")
+    CombRotate.mainFrame.backupFrame.texture:SetColorTexture(0.8,0.8,0.8,0.8)
+    CombRotate.mainFrame.backupFrame.texture:SetHeight(1)
+    CombRotate.mainFrame.backupFrame.texture:SetWidth(60)
+    CombRotate.mainFrame.backupFrame.texture:SetPoint('TOP')
 end
 
--- Create single hunter frame
-function TranqRotate:createHunterFrame(hunter, parentFrame)
-    hunter.frame = CreateFrame("Frame", nil, parentFrame)
-    hunter.frame:SetHeight(TranqRotate.constants.hunterFrameHeight)
+-- Create single mage frame
+function CombRotate:createMageFrame(mage, parentFrame)
+    mage.frame = CreateFrame("Frame", nil, parentFrame)
+    mage.frame:SetHeight(CombRotate.constants.mageFrameHeight)
 
     -- Set Texture
-    hunter.frame.texture = hunter.frame:CreateTexture(nil, "ARTWORK")
-    hunter.frame.texture:SetTexture("Interface\\AddOns\\TranqRotate\\textures\\steel.tga")
-    hunter.frame.texture:SetAllPoints()
+    mage.frame.texture = mage.frame:CreateTexture(nil, "ARTWORK")
+    mage.frame.texture:SetTexture("Interface\\AddOns\\CombustionRotate\\textures\\steel.tga")
+    mage.frame.texture:SetAllPoints()
 
     -- Set Text
-    hunter.frame.text = hunter.frame:CreateFontString(nil, "ARTWORK")
-    hunter.frame.text:SetFont(TranqRotate:getPlayerNameFont(), 12)
-    hunter.frame.text:SetPoint("LEFT",5,0)
-    hunter.frame.text:SetText(TranqRotate:formatPlayerName(hunter.name))
+    mage.frame.text = mage.frame:CreateFontString(nil, "ARTWORK")
+    mage.frame.text:SetFont(CombRotate:getPlayerNameFont(), 12)
+    mage.frame.text:SetPoint("LEFT",5,0)
+    mage.frame.text:SetText(CombRotate:formatPlayerName(mage.name))
 
-    TranqRotate:createCooldownFrame(hunter)
-    TranqRotate:createBlindIconFrame(hunter)
-    TranqRotate:configureHunterFrameDrag(hunter)
+    CombRotate:createCooldownFrame(mage)
+    CombRotate:createBlindIconFrame(mage)
+    CombRotate:configureMageFrameDrag(mage)
 
-    TranqRotate:toggleHunterFrameDragging(hunter, TranqRotate:isPlayerAllowedToManageRotation())
+    CombRotate:toggleMageFrameDragging(mage, CombRotate:isPlayerAllowedToManageRotation())
 end
 
 -- Create the cooldown frame
-function TranqRotate:createCooldownFrame(hunter)
+function CombRotate:createCooldownFrame(mage)
 
     -- Frame
-    hunter.frame.cooldownFrame = CreateFrame("Frame", nil, hunter.frame)
-    hunter.frame.cooldownFrame:SetPoint('LEFT', 5, 0)
-    hunter.frame.cooldownFrame:SetPoint('RIGHT', -5, 0)
-    hunter.frame.cooldownFrame:SetPoint('TOP', 0, -17)
-    hunter.frame.cooldownFrame:SetHeight(3)
+    mage.frame.cooldownFrame = CreateFrame("Frame", nil, mage.frame)
+    mage.frame.cooldownFrame:SetPoint('LEFT', 5, 0)
+    mage.frame.cooldownFrame:SetPoint('RIGHT', -5, 0)
+    mage.frame.cooldownFrame:SetPoint('TOP', 0, -17)
+    mage.frame.cooldownFrame:SetHeight(3)
 
     -- background
-    hunter.frame.cooldownFrame.background = hunter.frame.cooldownFrame:CreateTexture(nil, "ARTWORK")
-    hunter.frame.cooldownFrame.background:SetColorTexture(0,0,0,1)
-    hunter.frame.cooldownFrame.background:SetAllPoints()
+    mage.frame.cooldownFrame.background = mage.frame.cooldownFrame:CreateTexture(nil, "ARTWORK")
+    mage.frame.cooldownFrame.background:SetColorTexture(0,0,0,1)
+    mage.frame.cooldownFrame.background:SetAllPoints()
 
-    local statusBar = CreateFrame("StatusBar", nil, hunter.frame.cooldownFrame)
+    local statusBar = CreateFrame("StatusBar", nil, mage.frame.cooldownFrame)
     statusBar:SetAllPoints()
     statusBar:SetMinMaxValues(0,1)
 
@@ -204,9 +204,9 @@ function TranqRotate:createCooldownFrame(hunter)
     statusBarTexture:SetColorTexture(1, 0, 0);
     statusBar:SetStatusBarTexture(statusBarTexture);
 
-    hunter.frame.cooldownFrame.statusBar = statusBar
+    mage.frame.cooldownFrame.statusBar = statusBar
 
-    hunter.frame.cooldownFrame:SetScript(
+    mage.frame.cooldownFrame:SetScript(
         "OnUpdate",
         function(self, elapsed)
             self.statusBar:SetValue(GetTime())
@@ -217,43 +217,43 @@ function TranqRotate:createCooldownFrame(hunter)
         end
     )
 
-    hunter.frame.cooldownFrame:Hide()
+    mage.frame.cooldownFrame:Hide()
 end
 
 -- Create the blind icon frame
-function TranqRotate:createBlindIconFrame(hunter)
+function CombRotate:createBlindIconFrame(mage)
 
     -- Frame
-    hunter.frame.blindIconFrame = CreateFrame("Frame", nil, hunter.frame)
-    hunter.frame.blindIconFrame:SetPoint('RIGHT', -5, 0)
-    hunter.frame.blindIconFrame:SetPoint('CENTER', 0, 0)
-    hunter.frame.blindIconFrame:SetWidth(16)
-    hunter.frame.blindIconFrame:SetHeight(16)
+    mage.frame.blindIconFrame = CreateFrame("Frame", nil, mage.frame)
+    mage.frame.blindIconFrame:SetPoint('RIGHT', -5, 0)
+    mage.frame.blindIconFrame:SetPoint('CENTER', 0, 0)
+    mage.frame.blindIconFrame:SetWidth(16)
+    mage.frame.blindIconFrame:SetHeight(16)
 
     -- Set Texture
-    hunter.frame.blindIconFrame.texture = hunter.frame.blindIconFrame:CreateTexture(nil, "ARTWORK")
-    hunter.frame.blindIconFrame.texture:SetTexture("Interface\\AddOns\\TranqRotate\\textures\\blind.tga")
-    hunter.frame.blindIconFrame.texture:SetAllPoints()
-    hunter.frame.blindIconFrame.texture:SetTexCoord(0.15, 0.85, 0.15, 0.85);
+    mage.frame.blindIconFrame.texture = mage.frame.blindIconFrame:CreateTexture(nil, "ARTWORK")
+    mage.frame.blindIconFrame.texture:SetTexture("Interface\\AddOns\\CombustionRotate\\textures\\blind.tga")
+    mage.frame.blindIconFrame.texture:SetAllPoints()
+    mage.frame.blindIconFrame.texture:SetTexCoord(0.15, 0.85, 0.15, 0.85);
 
     -- Tooltip
-    hunter.frame.blindIconFrame:SetScript("OnEnter", TranqRotate.onBlindIconEnter)
-    hunter.frame.blindIconFrame:SetScript("OnLeave", TranqRotate.onBlindIconLeave)
+    mage.frame.blindIconFrame:SetScript("OnEnter", CombRotate.onBlindIconEnter)
+    mage.frame.blindIconFrame:SetScript("OnLeave", CombRotate.onBlindIconLeave)
 
     -- Drag & drop handlers
-    hunter.frame.blindIconFrame:SetScript("OnDragStart", function(self, ...)
+    mage.frame.blindIconFrame:SetScript("OnDragStart", function(self, ...)
         ExecuteFrameScript(self:GetParent(), "OnDragStart", ...);
     end)
-    hunter.frame.blindIconFrame:SetScript("OnDragStop", function(self, ...)
+    mage.frame.blindIconFrame:SetScript("OnDragStop", function(self, ...)
         ExecuteFrameScript(self:GetParent(), "OnDragStop", ...);
     end)
 
-    hunter.frame.blindIconFrame:Hide()
+    mage.frame.blindIconFrame:Hide()
 end
 
 -- Blind icon tooltip show
-function TranqRotate:onBlindIconEnter()
-    if (TranqRotate.db.profile.showBlindIconTooltip) then
+function CombRotate:onBlindIconEnter()
+    if (CombRotate.db.profile.showBlindIconTooltip) then
         GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT")
         GameTooltip:SetText(L["TOOLTIP_PLAYER_WITHOUT_ADDON"])
         GameTooltip:AddLine(L["TOOLTIP_MAY_RUN_OUDATED_VERSION"])
@@ -263,44 +263,6 @@ function TranqRotate:onBlindIconEnter()
 end
 
 -- Blind icon tooltip hide
-function TranqRotate:onBlindIconLeave(self, motion)
+function CombRotate:onBlindIconLeave(self, motion)
     GameTooltip:Hide()
-end
-
--- Create the boss frenzy CD frame
-function TranqRotate:createFrenzyFrame()
-
-    -- Frame
-    TranqRotate.mainFrame.frenzyFrame = CreateFrame("Frame", nil, TranqRotate.mainFrame)
-    TranqRotate.mainFrame.frenzyFrame:SetPoint('LEFT', 0, 0)
-    TranqRotate.mainFrame.frenzyFrame:SetPoint('RIGHT', 0, 0)
-    TranqRotate.mainFrame.frenzyFrame:SetPoint('TOP', 0, -TranqRotate.constants.titleBarHeight)
-    TranqRotate.mainFrame.frenzyFrame:SetHeight(2)
-
-    local statusBar = CreateFrame("StatusBar", nil, TranqRotate.mainFrame.frenzyFrame)
-    statusBar:SetAllPoints()
-    statusBar:SetMinMaxValues(0,1)
-    statusBar:SetValue(0)
-
-    local statusBarTexture = statusBar:CreateTexture(nil, "OVERLAY");
-    statusBarTexture:SetColorTexture(1, 0.4, 0);
-    statusBar:SetStatusBarTexture(statusBarTexture);
-
-    TranqRotate.mainFrame.frenzyFrame.statusBar = statusBar
-
-    TranqRotate.mainFrame.frenzyFrame:SetScript(
-        "OnUpdate",
-        function(self, elapsed)
-
-            if (self.statusBar.expirationTime) then
-                self.statusBar:SetValue(GetTime())
-                if (self.statusBar.expirationTime < GetTime()) then
-                    statusBar:GetStatusBarTexture():SetColorTexture(1, 0, 0);
-                end
-            end
-
-        end
-    )
-
-    TranqRotate.mainFrame.frenzyFrame:Hide()
 end

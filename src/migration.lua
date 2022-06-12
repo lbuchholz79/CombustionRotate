@@ -1,28 +1,20 @@
 -- Runs migrations on the current profile based on the currentMigration value
-function TranqRotate:migrateProfile()
+function CombRotate:migrateProfile()
 
-    if (TranqRotate.db.profile.currentMigration == nil) then
-        TranqRotate.db.profile.currentMigration = 0
+    if (CombRotate.db.profile.currentMigration == nil) then
+        CombRotate.db.profile.currentMigration = 0
     end
 
-    if (TranqRotate.db.profile.currentMigration < #TranqRotate.migrations) then
-        for i = TranqRotate.db.profile.currentMigration + 1, #TranqRotate.migrations, 1 do
-            TranqRotate.migrations[i]()
-            TranqRotate.db.profile.currentMigration = i
+    if (CombRotate.db.profile.currentMigration < #CombRotate.migrations) then
+        for i = CombRotate.db.profile.currentMigration + 1, #CombRotate.migrations, 1 do
+            CombRotate.migrations[i]()
+            CombRotate.db.profile.currentMigration = i
         end
     end
 end
 
-TranqRotate.migrations = {
-    -- 1.6.0
+CombRotate.migrations = {
+    -- 1.0.0
     function()
-        -- Those are old, badly named key
-        TranqRotate.db.profile.enableTimedBackupAlertValue = nil
-        TranqRotate.db.profile.timedBackupAlertValueDelay = nil
-    end,
-    -- 1.8.0
-    function()
-        -- This is an old key
-        TranqRotate.db.profile.announceSuccessMessage = nil
     end,
 }

@@ -1,9 +1,9 @@
-TranqRotate = select(2, ...)
+CombRotate = select(2, ...)
 
 local L = {
 
-    ["LOADED_MESSAGE"] = "TranqRotate loaded, type /tranq for options",
-    ["TRANQ_WINDOW_HIDDEN"] = "Tranqrotate window hidden. Use /tranq toggle to get it back",
+    ["LOADED_MESSAGE"] = "CombustionRotate loaded, type /comb for options",
+    ["COMB_WINDOW_HIDDEN"] = "CombustionRotate window hidden. Use /comb toggle to get it back",
 
     -- Buttons tooltips
     ["BUTTON_CLOSE"] = "Hide window",
@@ -14,7 +14,7 @@ local L = {
     -- Settings
     ["SETTING_GENERAL"] = "General",
     ["SETTING_GENERAL_REPORT"] = "Please report any issue at",
-    ["SETTING_GENERAL_DESC"] = "New : TranqRotate will now play a sound when you need to shoot your tranqshot ! There are also few more display options to make the addon less intrusive.",
+    ["SETTING_GENERAL_DESC"] = "New : CombustionRotate will now play a sound when you need to apply your combustion! There are also few more display options to make the addon less intrusive.",
 
     ["LOCK_WINDOW"] = "Lock window",
     ["LOCK_WINDOW_DESC"] = "Lock window",
@@ -24,41 +24,37 @@ local L = {
     ["HIDE_WINDOW_NOT_IN_RAID_DESC"] = "Hide the window when not in a raid",
     ["DO_NOT_SHOW_WHEN_JOINING_RAID"] = "Do not show window when joining a raid",
     ["DO_NOT_SHOW_WHEN_JOINING_RAID_DESC"] = "Check this if you don't want the window to show up each time you join a raid",
-    ["SHOW_WHEN_TARGETING_BOSS"] = "Show window when you target a tranq-able boss",
-    ["SHOW_WHEN_TARGETING_BOSS_DESC"] = "Show window when you target a tranq-able boss",
-    ["WINDOW_LOCKED"] = "TranqRotate: Window locked",
-    ["WINDOW_UNLOCKED"] = "TranqRotate: Window unlocked",
+    ["SHOW_WHEN_TARGETING_BOSS"] = "Show window when you target a non fire-immune boss",
+    ["SHOW_WHEN_TARGETING_BOSS_DESC"] = "Show window when you target a non fire-immune boss",
+    ["WINDOW_LOCKED"] = "CombuistionRotate: Window locked",
+    ["WINDOW_UNLOCKED"] = "CombustionRotate: Window unlocked",
 
     --- Player names formatting options
     ["PLAYER_NAME_FORMAT"] = "Player names format",
-    ["PLAYER_NAME_FORMAT_DESC"] = "On connected realms, players from other servers will have a the server suffix hidden by default. If you ever get two hunter with the exact same name, adjust this setting to your needs",
+    ["PLAYER_NAME_FORMAT_DESC"] = "On connected realms, players from other servers will have a the server suffix hidden by default. If you ever get two mages with the exact same name, adjust this setting to your needs",
     ["PLAYER_NAME_ONLY_OPTION_LABEL"] = "Playername",
     ["SHORTENED_SUFFIX_OPTION_LABEL"] = "Playername-Ser",
     ["FULL_NAME_OPTION_LABEL"] = "Playername-Server",
 
     ["TEST_MODE_HEADER"] = "Test mode",
-    ["ENABLE_ARCANE_SHOT_TESTING"] = "Toggle testing mode",
-    ["ENABLE_ARCANE_SHOT_TESTING_DESC"] =
-        "While testing mode is enabled, arcane shot will be registered as a tranqshot\n" ..
+    ["ENABLE_FIRE_BLAST_TESTING"] = "Toggle testing mode",
+    ["ENABLE_FIRE_BLAST_TESTING_DESC"] =
+        "While testing mode is enabled, fire blast (rank 7) will be registered as a combustion\n" ..
         "Testing mode will last 10 minutes unless you toggle it off",
-    ["ARCANE_SHOT_TESTING_ENABLED"] = "Arcane shot testing mode enabled for 10 minutes",
-    ["ARCANE_SHOT_TESTING_DISABLED"] = "Arcane shot testing mode disabled",
+    ["FIRE_BLAST_TESTING_ENABLED"] = "Fire blast (rank 7) testing mode enabled for 10 minutes",
+    ["FIRE_BLAST_TESTING_DISABLED"] = "Fire blast (rank 7) testing mode disabled",
 
     ["FEATURES_HEADER"] = "Optionals features",
-    ["DISPLAY_BOSS_FRENZY_COOLDOWN"] = "Display frenzy cooldown progress bar",
-    ["DISPLAY_BOSS_FRENZY_COOLDOWN_DESC"] = "A thin progress bar just under the title bar will show the progress",
-    ["DISPLAY_BLIND_ICON"] = "Show an icon for hunter without TranqRotate",
-    ["DISPLAY_BLIND_ICON_DESC"] = "Adds a blind icon on the hunter frame to indicate he's not using the addon. This means he will not be aware of the rotate unless you communicate with him and his tranqshot won't be synced if he's far from every other TranqRotate user.",
+    ["DISPLAY_BLIND_ICON"] = "Show an icon for mage without CombustionRotate",
+    ["DISPLAY_BLIND_ICON_DESC"] = "Adds a blind icon on the mage frame to indicate he's not using the addon. This means he will not be aware of the rotate unless you communicate with him and his combustion won't be synced if he's far from every other CombustionRotate user.",
     ["DISPLAY_BLIND_ICON_TOOLTIP"] = "Show the blind icon tooltip",
     ["DISPLAY_BLIND_ICON_TOOLTIP_DESC"] = "You can disable this options to disable the tooltip while still having the icon",
     ["ENABLE_AUTOMATIC_BACKUP_ALERT_WHEN_INCAPACITATED"] = "Enable automatic backup alert when incapacitated",
-    ["ENABLE_AUTOMATIC_BACKUP_ALERT_WHEN_INCAPACITATED_DESC"] = "TranqRotate will check for your debuffs when you should actually tranq and will call for backup if you are incapacitated for longer than the defined delay",
+    ["ENABLE_AUTOMATIC_BACKUP_ALERT_WHEN_INCAPACITATED_DESC"] = "CombustionRotate will check for your debuffs when you should actually apply combustion and will call for backup if you are incapacitated for longer than the defined delay",
     ["INCAPACITATED_DELAY_THRESHOLD"] = "Incapacitated alert threshold",
-    ["INCAPACITATED_DELAY_THRESHOLD_DESC"] = "If you are incapacitated for longer than the configured delay, TranqRotate will automatically call for backup",
-    ["ENABLE_AUTOMATIC_TIMED_BACKUP_ALERT"] = "Enable timed automatic backup alert",
-    ["ENABLE_AUTOMATIC_TIMED_BACKUP_ALERT_DESC"] = "TranqRotate will call for backup if the boss is on frenzy for a defined delay and you should have been tranqing it",
+    ["INCAPACITATED_DELAY_THRESHOLD_DESC"] = "If you are incapacitated for longer than the configured delay, CombustionRotate will automatically call for backup",
     ["TIMED_DELAY_THRESHOLD"] = "Timed alert threshold",
-    ["TIMED_DELAY_THRESHOLD_DESC"] = "TranqRotate will automatically call for backup if you do not tranq within the configured threshold",
+    ["TIMED_DELAY_THRESHOLD_DESC"] = "CombustionRotate will automatically call for backup if you do not apply combustion within the configured threshold",
 
     --- Announces
     ["SETTING_ANNOUNCES"] = "Announces",
@@ -83,47 +79,43 @@ local L = {
 
     ---- Messages
     ["ANNOUNCES_MESSAGE_HEADER"] = "Announce messages",
-    ["BOSS_SUCCESS_MESSAGE_LABEL"] = "Successful announce message on boss (%s will be replaced by next hunter name)",
+    ["BOSS_SUCCESS_MESSAGE_LABEL"] = "Successful announce message on boss (%s will be replaced by next mage name)",
     ["TRASH_SUCCESS_MESSAGE_LABEL"] = "Successful announce message on trash (%s will be replaced by target name)",
-    ["FAIL_MESSAGE_LABEL"] = "Fail announce message",
-    ["FAIL_WHISPER_LABEL"] = "Fail whisper message",
-    ["UNABLE_TO_TRANQ_MESSAGE_LABEL"] = "Message whispered when you cannot tranq or call for backup",
+    ["FAIL_IMMUNE_LABEL"] = "Target is fire immune!",
+    ["UNABLE_TO_COMB_MESSAGE_LABEL"] = "Message whispered when you cannot apply comsution or call for backup",
 
-    ['DEFAULT_BOSS_SUCCESS_ANNOUNCE_MESSAGE'] = "Tranqshot done, %s is next!",
-    ['DEFAULT_TRASH_SUCCESS_ANNOUNCE_MESSAGE'] = "Tranqshot done on %s",
-    ['DEFAULT_FAIL_ANNOUNCE_MESSAGE'] = "!!! TRANQSHOT FAILED ON %s !!!",
-    ['DEFAULT_FAIL_WHISPER_MESSAGE'] = "TRANQSHOT MISSED ! TRANQ NOW !",
-    ['DEFAULT_UNABLE_TO_TRANQ_MESSAGE'] = "I'M UNABLE TO TRANQ ! TRANQ NOW !",
+    ['DEFAULT_BOSS_SUCCESS_ANNOUNCE_MESSAGE'] = "Combustion applied, %s is next!",
+    ['DEFAULT_TRASH_SUCCESS_ANNOUNCE_MESSAGE'] = "Combustion applied on %s",
+    ['DEFAULT_UNABLE_TO_COMB_MESSAGE'] = "I'M UNABLE TO APPLY COMBUSTION!",
 
-    ['TRANQ_NOW_LOCAL_ALERT_MESSAGE'] = "USE TRANQSHOT NOW !",
+    ['COMB_NOW_LOCAL_ALERT_MESSAGE'] = "USE COMBUSTION NOW !",
 
     ["BROADCAST_MESSAGE_HEADER"] = "Rotation setup text broadcast",
     ["USE_MULTILINE_ROTATION_REPORT"] = "Use multiline for main rotation when reporting",
     ["USE_MULTILINE_ROTATION_REPORT_DESC"] = "Check this option if you want more comprehensible order display",
 
     --- Raid broadcast messages
-    ["BROADCAST_HEADER_TEXT"] = "Hunter tranqshot setup",
+    ["BROADCAST_HEADER_TEXT"] = "Mage combustion setup",
     ["BROADCAST_ROTATION_PREFIX"] = "Rotation",
     ["BROADCAST_BACKUP_PREFIX"] = "Backup",
 
     --- Sounds
     ["SETTING_SOUNDS"] = "Sounds",
-    ["ENABLE_NEXT_TO_TRANQ_SOUND"] = "Play a sound when you are the next to shoot",
-    ["ENABLE_TRANQ_NOW_SOUND"] = "Play a sound when you have to shoot your tranq",
-    ["TRANQ_NOW_SOUND_CHOICE"] = "Select the sound you want to use for the 'tranq now' alert",
-    ["DBM_SOUND_WARNING"] = "DBM is playing the 'flag taken' sound on each frenzy, it may prevent you from earing gentle sounds from TranqRotate. I would either suggest to pick a strong sound or disable DBM frenzy sound.",
+    ["ENABLE_NEXT_TO_COMB_SOUND"] = "Play a sound when you are the next to trigger combustion",
+    ["ENABLE_COMB_NOW_SOUND"] = "Play a sound when you have to apply combustion",
+    ["COMB_NOW_SOUND_CHOICE"] = "Select the sound you want to use for the 'apply combustion now' alert",
 
     --- Profiles
     ["SETTING_PROFILES"] = "Profiles",
 
     -- Blind icon tooltip
-    ["TOOLTIP_PLAYER_WITHOUT_ADDON"] = "This player does not use TranqRotate",
+    ["TOOLTIP_PLAYER_WITHOUT_ADDON"] = "This player does not use CombustionRotate",
     ["TOOLTIP_MAY_RUN_OUDATED_VERSION"] = "Or runs an outdated version below 1.6.0",
     ["TOOLTIP_DISABLE_SETTINGS"] = "(You can disable this icon and/or this tooltip in the settings)",
 
     -- Available update
-    ["UPDATE_AVAILABLE"] = "A new TranqRotate version is available, update to get latest features",
-    ["BREAKING_UPDATE_AVAILABLE"] = "A new BREAKING TranqRotate update is available, you MUST update AS SOON AS possible! TranqRotate may not work properly with up-to-date version users.",
+    ["UPDATE_AVAILABLE"] = "A new CombustionRotate version is available, update to get latest features",
+    ["BREAKING_UPDATE_AVAILABLE"] = "A new BREAKING CombustionRotate update is available, you MUST update AS SOON AS possible! CombustionRotate may not work properly with up-to-date version users.",
 
     -- Rotation reset
     ["RESET_UNAUTHORIZED"] = "You must be raid assist to reset the rotation",
@@ -134,15 +126,10 @@ local L = {
     ["COMMS_RECEIVED_BACKUP_REQUEST"] = "%s asked for backup !",
     ["COMMS_RECEIVED_RESET_BROADCAST"] = "%s has reset the rotation.",
 
-    -- Failed tranq printed messages
-    ["PRINT_FAILED_TRANQ_MISS"] = "%s missed his tranqshot!",
-    ["PRINT_FAILED_TRANQ_RESIST"] = "%s's tranqshot was resisted!",
-    ["PRINT_FAILED_TRANQ_MISS_OR_RESIST"] = "%s's tranqshot was missed or resisted!",
-
     -- Version check printed messages
     ["VERSION_CHECK_HEADER"] = "Version check",
     ["VERSION_CHECK_YOU"] = "You",
-    ["VERSION_CHECK_NONE_OR_BELOW_1.6.0"] = "None or below 1.6.0",
+    ["VERSION_CHECK_NONE_OR_BELOW_1.0.0"] = "None or below 1.0.0",
 }
 
-TranqRotate.L = L
+CombRotate.L = L
