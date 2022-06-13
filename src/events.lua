@@ -1,5 +1,5 @@
 local combustion = GetSpellInfo(11129)
-local fireBlast = GetSpellInfo(10199)
+local fireBlast = GetSpellInfo(2136)
 
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_LOGIN")

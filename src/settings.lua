@@ -91,11 +91,23 @@ function CombRotate:CreateConfig()
                         type = "header",
                         order = 30,
                     },
+                    ToggleFireBlastTestingDesc = {
+                        name = L['ENABLE_FIRE_BLAST_TESTING_DESC'],
+                        type = "description",
+                        width = "full",
+                        order = 31,
+                    },
                     spacer12 = {
                         name = ' ',
                         type = "description",
                         width = "full",
                         order = 32,
+                    },
+                    ToggleFireBlastTesting = {
+                        name = L["ENABLE_FIRE_BLAST_TESTING"],
+                        type = "execute",
+                        order = 33,
+                        func = function() CombRotate.toggleFireBlastTesting() end
                     },
                     featuresHeader = {
                         name = L["FEATURES_HEADER"],

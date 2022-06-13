@@ -40,7 +40,7 @@ function CombRotate:createTitleFrame()
     CombRotate.mainFrame.titleFrame:SetHeight(CombRotate.constants.titleBarHeight)
 
     CombRotate.mainFrame.titleFrame.texture = CombRotate.mainFrame.titleFrame:CreateTexture(nil, "BACKGROUND")
-    CombRotate.mainFrame.titleFrame.texture:SetColorTexture(CombRotate.colors.darkGreen:GetRGB())
+    CombRotate.mainFrame.titleFrame.texture:SetColorTexture(CombRotate.colors.darkBlue:GetRGB())
     CombRotate.mainFrame.titleFrame.texture:SetAllPoints()
 
     CombRotate.mainFrame.titleFrame.text = CombRotate.mainFrame.titleFrame:CreateFontString(nil, "ARTWORK")

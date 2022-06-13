@@ -1,4 +1,4 @@
-## Interface: 11401
+## Interface: 11403
 ## Title: CombustionRotate
 ## Notes: A combustion rotation assistant heavily based on TranqRotate by Slivo
 ## Author: Teilzeit-Jedi

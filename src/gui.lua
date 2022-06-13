@@ -113,7 +113,7 @@ end
 -- Set the mage frame color regarding it's status
 function CombRotate:setMageFrameColor(mage)
 
-    local color = CombRotate.colors.green
+    local color = CombRotate.colors.blue
 
     if (not CombRotate:isMageOnline(mage)) then
         color = CombRotate.colors.gray

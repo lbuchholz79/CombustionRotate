@@ -39,10 +39,10 @@ local L = {
     ["TEST_MODE_HEADER"] = "Test mode",
     ["ENABLE_FIRE_BLAST_TESTING"] = "Toggle testing mode",
     ["ENABLE_FIRE_BLAST_TESTING_DESC"] =
-        "While testing mode is enabled, fire blast (rank 7) will be registered as a combustion\n" ..
+        "While testing mode is enabled, fire blast (rank 1) will be registered as a combustion\n" ..
         "Testing mode will last 10 minutes unless you toggle it off",
-    ["FIRE_BLAST_TESTING_ENABLED"] = "Fire blast (rank 7) testing mode enabled for 10 minutes",
-    ["FIRE_BLAST_TESTING_DISABLED"] = "Fire blast (rank 7) testing mode disabled",
+    ["FIRE_BLAST_TESTING_ENABLED"] = "Fire blast (rank 1) testing mode enabled for 10 minutes",
+    ["FIRE_BLAST_TESTING_DISABLED"] = "Fire blast (rank 1) testing mode disabled",
 
     ["FEATURES_HEADER"] = "Optionals features",
     ["DISPLAY_BLIND_ICON"] = "Show an icon for mage without CombustionRotate",
