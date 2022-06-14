@@ -27,14 +27,12 @@ end
 
 -- Checks if a mage combustion is ready
 function CombRotate:isMageCombustionCooldownReady(mage)
-    return mage.lastCombTime <= GetTime() - 180
+    return mage.lastCombTime <= GetTime() - CombRotate.constants.cooldownTime
 end
 
 -- Checks if a mage is eligible to combustion next
 function CombRotate:isEligibleForNextComb(mage)
-
-    local isCooldownShortEnough = mage.lastCombTime <= GetTime() - CombRotate.constants.minimumCooldownElapsedForEligibility
-
+    local isCooldownShortEnough = mage.lastCombTime <= GetTime() - CombRotate.constants.cooldownTime
     return CombRotate:isMageAliveAndOnline(mage) and isCooldownShortEnough
 end
 

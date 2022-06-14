@@ -11,6 +11,7 @@ CombRotate.colors = {
 
 CombRotate.constants = {
     ['className'] = 'MAGE',
+    ['cooldownTime'] = 180,
     ['mageFrameHeight'] = 22,
     ['mageFrameSpacing'] = 4,
     ['titleBarHeight'] = 18,
@@ -30,7 +31,6 @@ CombRotate.constants = {
 
     ['printPrefix'] = 'CombustionRotate - ',
     ['duplicateCombustionDelayThreshold'] = 10,
-    ['minimumCooldownElapsedForEligibility'] = 10,
 
     ['sounds'] = {
         ['nextToComb'] = 'Interface\\AddOns\\CombustionRotate\\sounds\\ding.ogg',

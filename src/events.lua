@@ -81,7 +81,8 @@ end
 
 -- Player left combat
 function CombRotate:ENCOUNTER_END()
-    CombRotate.endEncounter()
+    CombRotate:resetRotation()
+    CombRotate:sendResetBroadcast()
 end
 
 function CombRotate:PLAYER_TARGET_CHANGED()
