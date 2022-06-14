@@ -29,7 +29,7 @@ function CombRotate:CreateConfig()
                 order = 1,
                 args = {
                     descriptionText = {
-                        name = "CombustionRotate v" .. CombRotate.version .. " by Teilzeit-Jedi",
+                        name = "CombustionRotate v" .. CombRotate.version .. " by Teilzeit-Jedi heavily based on TranqRotate by Slivo",
                         type = "description",
                         width = "full",
                         order = 1,
@@ -206,10 +206,16 @@ function CombRotate:CreateConfig()
                         order = 24,
                         width = "double",
                     },
-                    announceFailMessage = {
+                    announceImmuneMessage = {
                         name = L["FAIL_IMMUNE_LABEL"],
                         type = "input",
                         order = 25,
+                        width = "double",
+                    },
+                    useCombNowMessage = {
+                        name = L["COMB_NOW_MESSAGE_LABEL"],
+                        type = "input",
+                        order = 26,
                         width = "double",
                     },
                     unableToCombMessage = {

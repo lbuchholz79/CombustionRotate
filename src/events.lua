@@ -1,18 +1,20 @@
 local combustion = GetSpellInfo(11129)
 local fireBlast = GetSpellInfo(2136)
+local playerGUID = UnitGUID("player")
 
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
-eventFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-eventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
-eventFrame:RegisterEvent("ENCOUNTER_END")
 
 eventFrame:SetScript(
     "OnEvent",
     function(self, event, ...)
-        if (event == "PLAYER_LOGIN") then
+        if (event == "PLAYER_LOGIN") and (CombRotate:isMage("player")) then
+            eventFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+            eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+            eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+            eventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+            eventFrame:RegisterEvent("ENCOUNTER_END")
+
             CombRotate:init()
             self:UnregisterEvent("PLAYER_LOGIN")
 
@@ -38,37 +40,31 @@ function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
     local spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, CombatLogGetCurrentEventInfo())
 
     if (spellName == combustion or (CombRotate.testMode and spellName == fireBlast)) then
-        local mage = CombRotate:getMage(sourceGUID)
-        if (mage) then
+        local sourceMage = CombRotate:getMage(sourceGUID)
+        if (sourceMage) then
             if (event == "SPELL_CAST_SUCCESS") then
-                CombRotate:sendSyncComb(mage, false, timestamp)
-                CombRotate:rotate(mage)
-                if  (sourceGUID == UnitGUID("player")) then
+                CombRotate:sendSyncComb(sourceMage, false, timestamp)
+                CombRotate:rotate(sourceMage)
+                if (sourceGUID == playerGUID) then
                     CombRotate:sendAnnounceMessage(
-                        CombRotate:getCombSuccessMessage(
-                            destName,
-                            destRaidFlags
-                        )
+                            CombRotate:getCombSuccessMessage(
+                                    destName,
+                                    destRaidFlags
+                            )
                     )
                 end
-            elseif (CombRotate:isBossFireImmune(UnitGUID("target"))) then
-                CombRotate:sendSyncComb(mage, true, timestamp, event)
-                if  (sourceGUID == UnitGUID("player")) then
-                    CombRotate:sendAnnounceMessage(CombRotate:getCombImmuneMessage(destName, destRaidFlags))
+            elseif (event == "SPELL_MISSED" or event == "SPELL_DISPEL_FAILED") then
+                CombRotate:sendSyncComb(sourceMage, true, timestamp, event)
+                if (sourceGUID == playerGUID) then
+                    CombRotate:sendAnnounceMessage(
+                            CombRotate:getCombFailMessage(
+                                    CombRotate:isBossFireImmune(destGUID),
+                                    destName,
+                                    destRaidFlags
+                            )
+                    )
                 end
             end
-        end
-    elseif (event == "SPELL_AURA_APPLIED" and not CombRotate:isBossFireImmune(sourceGUID)) then
-        if (CombRotate:isPlayerNextComb()) then
-            CombRotate:throwCombAlert()
-
-            if (CombRotate.db.profile.enableIncapacitatedBackupAlert and CombRotate:isPlayedIncapacitatedByDebuff()) then
-                CombRotate:alertBackup(CombRotate.db.profile.unableToCombMessage)
-            end
-        end
-    elseif (event == "UNIT_DIED" and not CombRotate:isBossFireImmune(destGUID)) then
-        if (CombRotate:isPlayerAllowedToManageRotation()) then
-            CombRotate:endEncounter()
         end
     end
 end

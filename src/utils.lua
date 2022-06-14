@@ -49,13 +49,6 @@ function CombRotate:isInPveRaid()
 end
 
 function CombRotate:getPlayerNameFont()
-    local locale = GetLocale()
-    if (locale == "zhCN" or locale == "zhTW") then
-        return "Fonts\\ARHei.ttf"
-    elseif (locale == "koKR") then
-        return "Fonts\\2002.ttf"
-    end
-
     return "Fonts\\ARIALN.ttf"
 end
 
@@ -72,7 +65,7 @@ function CombRotate:isBossFireImmune(guid)
 
     if (type == "Creature") then
         for i, bossId in ipairs(bosses) do
-            if (bossId ~= mobId) then
+            if (bossId == mobId) then
                 return true
             end
         end
@@ -83,7 +76,7 @@ end
 
 -- Checks if the player is a mage
 function CombRotate:isMage(name)
-    return select(2,UnitClass(name)) == 'MAGE'
+    return select(2, UnitClass(name)) == CombRotate.constants.className
 end
 
 -- Check if unit is promoted (raid assist or raid leader)

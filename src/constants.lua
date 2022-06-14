@@ -1,7 +1,8 @@
 CombRotate.colors = {
-    ['blue'] = CreateColor(0.25, 0.78, 0.92),       -- #3FC7EB
-    ['darkBlue'] = CreateColor(0.15, 0.33, 0.81),   -- #2653cf
-    ['blue'] = CreateColor(0.3, 0.3, 0.7),
+    ['blue'] = CreateColor(0.25, 0.78, 0.92),   -- #3FC7EB
+    ['header'] = CreateColor(1.0, 0.81, 0.0),   -- #FDD000
+    ['shadow'] = CreateColor(0.7, 0.3, 0.3),    -- red
+    ['headerBg'] = CreateColor(0.48, 0.1, 0.0), -- #7C3800
     ['red'] = CreateColor(0.7, 0.3, 0.3),
     ['gray'] = CreateColor(0.3, 0.3, 0.3),
     ['purple'] = CreateColor(0.71,0.45,0.75),
@@ -9,6 +10,7 @@ CombRotate.colors = {
 }
 
 CombRotate.constants = {
+    ['className'] = 'MAGE',
     ['mageFrameHeight'] = 22,
     ['mageFrameSpacing'] = 4,
     ['titleBarHeight'] = 18,
@@ -26,7 +28,7 @@ CombRotate.constants = {
         ['reset'] = 'reset',
     },
 
-    ['printPrefix'] = 'CombRotate - ',
+    ['printPrefix'] = 'CombustionRotate - ',
     ['duplicateCombustionDelayThreshold'] = 10,
     ['minimumCooldownElapsedForEligibility'] = 10,
 

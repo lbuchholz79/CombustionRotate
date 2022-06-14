@@ -19,17 +19,17 @@ libs\AceSerializer-3.0\AceSerializer-3.0.xml
 
 locales\enUS.lua
 
+src\constants.lua
+src\utils.lua
 src\combRotate.lua
 src\events.lua
 src\rotation.lua
-src\constants.lua
 src\frames.lua
 src\gui.lua
 src\dragdrop.lua
 src\comms.lua
 src\defaults.lua
 src\settings.lua
-src\utils.lua
 src\debuff.lua
 src\migration.lua
 src\raidIcons.lua

@@ -419,7 +419,7 @@ end
 
 -- Display an alert and play a sound when the player should immediately use combustion
 function CombRotate:throwCombAlert()
-    RaidNotice_AddMessage(RaidWarningFrame, L['COMB_NOW_LOCAL_ALERT_MESSAGE'], ChatTypeInfo["RAID_WARNING"])
+    RaidNotice_AddMessage(RaidWarningFrame, CombRotate.db.profile.useCombNowMessage, ChatTypeInfo["RAID_WARNING"])
 
     if (CombRotate.db.profile.enableCombNowSound) then
         PlaySoundFile(CombRotate.constants.sounds.alarms[CombRotate.db.profile.combNowSound])
@@ -472,12 +472,18 @@ function CombRotate:getCombSuccessMessage(targetName, raidIconFlags)
     return message
 end
 
-function CombRotate:getCombImmuneMessage(targetName, raidIconFlags)
+function CombRotate:getCombFailMessage(isFireImmune, targetName, raidIconFlags)
 
-    local message = CombRotate.db.profile.announceImmuneMessage
+    local message = ""
+    if (isFireImmune) then
+        message = CombRotate.db.profile.announceImmuneMessage
+    else
+        message = CombRotate.db.profile.unableToCombMessage
+    end
+
     message = string.format(
-        message,
-        CombRotate:getRaidTargetIcon(raidIconFlags) .. targetName
+            message,
+            TranqRotate:getRaidTargetIcon(raidIconFlags) .. targetName
     )
 
     return message

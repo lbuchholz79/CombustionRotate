@@ -40,16 +40,16 @@ function CombRotate:createTitleFrame()
     CombRotate.mainFrame.titleFrame:SetHeight(CombRotate.constants.titleBarHeight)
 
     CombRotate.mainFrame.titleFrame.texture = CombRotate.mainFrame.titleFrame:CreateTexture(nil, "BACKGROUND")
-    CombRotate.mainFrame.titleFrame.texture:SetColorTexture(CombRotate.colors.darkBlue:GetRGB())
+    CombRotate.mainFrame.titleFrame.texture:SetColorTexture(CombRotate.colors.headerBg:GetRGB())
     CombRotate.mainFrame.titleFrame.texture:SetAllPoints()
 
     CombRotate.mainFrame.titleFrame.text = CombRotate.mainFrame.titleFrame:CreateFontString(nil, "ARTWORK")
     CombRotate.mainFrame.titleFrame.text:SetFont("Fonts\\ARIALN.ttf", 12)
-    CombRotate.mainFrame.titleFrame.text:SetShadowColor(0,0,0,0.5)
+    CombRotate.mainFrame.titleFrame.text:SetShadowColor(CombRotate.colors.shadow:GetRGBA())
     CombRotate.mainFrame.titleFrame.text:SetShadowOffset(1,-1)
     CombRotate.mainFrame.titleFrame.text:SetPoint("LEFT",5,0)
     CombRotate.mainFrame.titleFrame.text:SetText('CombustionRotate')
-    CombRotate.mainFrame.titleFrame.text:SetTextColor(1,1,1,1)
+    CombRotate.mainFrame.titleFrame.text:SetTextColor(CombRotate.colors.header:GetRGBA())
 end
 
 -- Create title bar buttons

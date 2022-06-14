@@ -81,14 +81,15 @@ local L = {
     ["ANNOUNCES_MESSAGE_HEADER"] = "Announce messages",
     ["BOSS_SUCCESS_MESSAGE_LABEL"] = "Successful announce message on boss (%s will be replaced by next mage name)",
     ["TRASH_SUCCESS_MESSAGE_LABEL"] = "Successful announce message on trash (%s will be replaced by target name)",
-    ["FAIL_IMMUNE_LABEL"] = "Target is fire immune!",
+    ["FAIL_IMMUNE_LABEL"] = "Fail message when target is fire immune!",
+    ["COMB_NOW_MESSAGE_LABEL"] = "Message when you are supposed to cast combustion instantly!",
     ["UNABLE_TO_COMB_MESSAGE_LABEL"] = "Message whispered when you cannot apply comsution or call for backup",
 
     ['DEFAULT_BOSS_SUCCESS_ANNOUNCE_MESSAGE'] = "Combustion applied, %s is next!",
     ['DEFAULT_TRASH_SUCCESS_ANNOUNCE_MESSAGE'] = "Combustion applied on %s",
+    ['DEFAULT_FAIL_FIRE_IMMUNE_MESSAGE'] = "Target is fire immune!",
+    ['DEFAULT_USE_COMB_NOW_MESSAGE'] = "USE COMBUSTION NOW!",
     ['DEFAULT_UNABLE_TO_COMB_MESSAGE'] = "I'M UNABLE TO APPLY COMBUSTION!",
-
-    ['COMB_NOW_LOCAL_ALERT_MESSAGE'] = "USE COMBUSTION NOW !",
 
     ["BROADCAST_MESSAGE_HEADER"] = "Rotation setup text broadcast",
     ["USE_MULTILINE_ROTATION_REPORT"] = "Use multiline for main rotation when reporting",
@@ -110,7 +111,7 @@ local L = {
 
     -- Blind icon tooltip
     ["TOOLTIP_PLAYER_WITHOUT_ADDON"] = "This player does not use CombustionRotate",
-    ["TOOLTIP_MAY_RUN_OUDATED_VERSION"] = "Or runs an outdated version below 1.6.0",
+    ["TOOLTIP_MAY_RUN_OUDATED_VERSION"] = "or runs an outdated version below 1.0.0",
     ["TOOLTIP_DISABLE_SETTINGS"] = "(You can disable this icon and/or this tooltip in the settings)",
 
     -- Available update

@@ -23,7 +23,6 @@ function CombRotate:init()
 
     CombRotate.raidInitialized = false
     CombRotate.testMode = false
-    CombRotate.frenzy = false
     CombRotate.lastRotationReset = 0
 
     CombRotate:initGui()
