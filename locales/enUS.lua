@@ -3,6 +3,7 @@ CombRotate = select(2, ...)
 local L = {
 
     ["LOADED_MESSAGE"] = "CombustionRotate loaded, type /comb for options",
+    ["UNLOADED_MESSAGE"] = "CombustionRotate disabled, your class is not a mage!",
     ["COMB_WINDOW_HIDDEN"] = "CombustionRotate window hidden. Use /comb toggle to get it back",
 
     -- Buttons tooltips
@@ -37,12 +38,15 @@ local L = {
     ["FULL_NAME_OPTION_LABEL"] = "Playername-Server",
 
     ["TEST_MODE_HEADER"] = "Test mode",
-    ["ENABLE_FIRE_BLAST_TESTING"] = "Toggle testing mode",
-    ["ENABLE_FIRE_BLAST_TESTING_DESC"] =
-        "While testing mode is enabled, fire blast (rank 1) will be registered as a combustion\n" ..
+    ["ACTIVATE_TESTING"] = "Activate testing mode",
+    ["DEACTIVATE_TESTING"] = "Deactivate testing mode",
+    ["TESTING_DESC"] =
+        "While testing mode is enabled, fire blast (any rank) will be registered as a combustion\n" ..
         "Testing mode will last 10 minutes unless you toggle it off",
-    ["FIRE_BLAST_TESTING_ENABLED"] = "Fire blast (rank 1) testing mode enabled for 10 minutes",
-    ["FIRE_BLAST_TESTING_DISABLED"] = "Fire blast (rank 1) testing mode disabled",
+    ["REMAINING_TESTING_TIME"] = "     Remaining testing time: %s",
+    ["REMAINING_TESTING_TIME_OFF"] = "off",
+    ["TESTING_ENABLED"] = "Fire blast testing mode enabled for 10 minutes",
+    ["TESTING_DISABLED"] = "Fire blast testing mode disabled",
 
     ["FEATURES_HEADER"] = "Optionals features",
     ["DISPLAY_BLIND_ICON"] = "Show an icon for mage without CombustionRotate",

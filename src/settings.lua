@@ -91,8 +91,8 @@ function CombRotate:CreateConfig()
                         type = "header",
                         order = 30,
                     },
-                    ToggleFireBlastTestingDesc = {
-                        name = L['ENABLE_FIRE_BLAST_TESTING_DESC'],
+                    ToggleTestingDesc = {
+                        name = L['TESTING_DESC'],
                         type = "description",
                         width = "full",
                         order = 31,
@@ -103,11 +103,20 @@ function CombRotate:CreateConfig()
                         width = "full",
                         order = 32,
                     },
-                    ToggleFireBlastTesting = {
-                        name = L["ENABLE_FIRE_BLAST_TESTING"],
+                    ToggleTesting = {
+                        name = function()
+                            if (CombRotate.testMode) then return L["DEACTIVATE_TESTING"] else return L["ACTIVATE_TESTING"] end
+                        end,
                         type = "execute",
                         order = 33,
-                        func = function() CombRotate.toggleFireBlastTesting() end
+                        width = "double",
+                        func = function() CombRotate:toggleTesting() end,
+                    },
+                    remainingTestingTime = {
+                        name = function() return CombRotate:getRemainingTestingTime() end,
+                        type = "description",
+                        order = 34,
+                        width = "normal",
                     },
                     featuresHeader = {
                         name = L["FEATURES_HEADER"],

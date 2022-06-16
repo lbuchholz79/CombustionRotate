@@ -149,8 +149,9 @@ end
 
 -- Starts the combustion cooldown progress
 function CombRotate:startMageCooldown(mage)
-    mage.frame.cooldownFrame.statusBar:SetMinMaxValues(GetTime(), GetTime() + CombRotate.constants.cooldownTime)
-    mage.frame.cooldownFrame.statusBar.expirationTime = GetTime() + CombRotate.constants.cooldownTime
+    local timeToCooldownEnd = GetTime() + CombRotate:getCooldownTime()
+    mage.frame.cooldownFrame.statusBar:SetMinMaxValues(GetTime(), timeToCooldownEnd)
+    mage.frame.cooldownFrame.statusBar.expirationTime = timeToCooldownEnd
     mage.frame.cooldownFrame:Show()
 end
 

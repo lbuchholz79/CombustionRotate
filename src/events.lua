@@ -1,5 +1,5 @@
 local combustion = GetSpellInfo(11129)
-local fireBlast = GetSpellInfo(2136)
+local testingSpell = GetSpellInfo(2136)
 local playerGUID = UnitGUID("player")
 
 local eventFrame = CreateFrame("Frame")
@@ -8,20 +8,24 @@ eventFrame:RegisterEvent("PLAYER_LOGIN")
 eventFrame:SetScript(
     "OnEvent",
     function(self, event, ...)
-        if (event == "PLAYER_LOGIN") and (CombRotate:isMage("player")) then
-            eventFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-            eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-            eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-            eventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
-            eventFrame:RegisterEvent("ENCOUNTER_END")
+        if (event == "PLAYER_LOGIN") then
+            if (CombRotate:isMage("player")) then
+                eventFrame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+                eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+                eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+                eventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+                eventFrame:RegisterEvent("ENCOUNTER_END")
 
-            CombRotate:init()
-            self:UnregisterEvent("PLAYER_LOGIN")
+                CombRotate:init()
+                self:UnregisterEvent("PLAYER_LOGIN")
 
-            -- Delayed raid update because raid data is unreliable at PLAYER_LOGIN
-            C_Timer.After(5, function()
-                CombRotate:updateRaidStatus()
-            end)
+                -- Delayed raid update because raid data is unreliable at PLAYER_LOGIN
+                C_Timer.After(5, function()
+                    CombRotate:updateRaidStatus()
+                end)
+            else
+                CombRotate:printMessage(CombRotate.L["UNLOADED_MESSAGE"])
+            end
         else
             CombRotate[event](CombRotate, ...)
         end
@@ -39,7 +43,7 @@ function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
     local timestamp, event, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
     local spellId, spellName, spellSchool, amount, overkill, school, resisted, blocked, absorbed, critical, glancing, crushing, isOffHand = select(12, CombatLogGetCurrentEventInfo())
 
-    if (spellName == combustion or (CombRotate.testMode and spellName == fireBlast)) then
+    if (spellName == combustion or (CombRotate.testMode and spellName == testingSpell)) then
         local sourceMage = CombRotate:getMage(sourceGUID)
         if (sourceMage) then
             if (event == "SPELL_CAST_SUCCESS") then
@@ -53,7 +57,7 @@ function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
                             )
                     )
                 end
-            elseif (event == "SPELL_MISSED" or event == "SPELL_DISPEL_FAILED") then
+            elseif (event == "SPELL_MISSED") then
                 CombRotate:sendSyncComb(sourceMage, true, timestamp, event)
                 if (sourceGUID == playerGUID) then
                     CombRotate:sendAnnounceMessage(

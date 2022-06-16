@@ -23,6 +23,7 @@ function CombRotate:init()
 
     CombRotate.raidInitialized = false
     CombRotate.testMode = false
+    CombRotate.testStart = 0
     CombRotate.lastRotationReset = 0
 
     CombRotate:initGui()
@@ -127,7 +128,7 @@ SlashCmdList["COMBROTATE"] = function(msg)
     elseif (cmd == 'rotate') then -- @todo decide if this should be removed or not (Used in runDemo)
         CombRotate:testRotation()
     elseif (cmd == 'test') then
-        CombRotate:toggleFireBlastTesting()
+        CombRotate:toggleTesting()
     elseif (cmd == 'report') then
         CombRotate:printRotationSetup()
     elseif (cmd == 'settings') then
@@ -216,20 +217,34 @@ function CombRotate:colorText(text)
 end
 
 -- Toggle fire blast testing mode
-function CombRotate:toggleFireBlastTesting(disable)
-
+function CombRotate:toggleTesting(disable)
     if (not disable and not CombRotate.testMode) then
-        CombRotate:printPrefixedMessage(L['FIRE_BLAST_TESTING_ENABLED'])
+        CombRotate:printPrefixedMessage(L['TESTING_ENABLED'])
         CombRotate.testMode = true
+        CombRotate.testModeStart = GetTime()
 
         -- Disable testing after 10 minutes
         C_Timer.After(600, function()
-            CombRotate:toggleFireBlastTesting(true)
+            if (CombRotate.testMode and CombRotate.testModeStart <= GetTime() - 600) then
+                CombRotate:toggleTesting(true)
+            end
         end)
     else
         CombRotate.testMode = false
-        CombRotate:printPrefixedMessage(L['FIRE_BLAST_TESTING_DISABLED'])
+        CombRotate:printPrefixedMessage(L['TESTING_DISABLED'])
     end
+end
+
+-- Get remaining testing time string
+function CombRotate:getRemainingTestingTime()
+    local remainingTestingTimeMsg = L['REMAINING_TESTING_TIME_OFF']
+    if (CombRotate.testMode) then
+        local remainingTestingTime = CombRotate.testModeStart + 600 - GetTime()
+        if (remainingTestingTime > 0) then
+            remainingTestingTimeMsg = string.format("%.0f",remainingTestingTime).." sec."
+        end
+    end
+    return string.format(L['REMAINING_TESTING_TIME'], remainingTestingTimeMsg)
 end
 
 -- Update the addon version of a given player

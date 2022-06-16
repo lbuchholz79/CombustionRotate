@@ -27,7 +27,16 @@ end
 
 -- Checks if a mage combustion is ready
 function CombRotate:isMageCombustionCooldownReady(mage)
-    return mage.lastCombTime <= GetTime() - CombRotate.constants.cooldownTime
+    return mage.lastCombTime <= GetTime() - CombRotate:getCooldownTime()
+end
+
+-- Get cooldown of combustion or testing delay
+function CombRotate:getCooldownTime()
+    if (CombRotate.testMode) then
+        return 10
+    else
+        return CombRotate.constants.cooldownTime
+    end
 end
 
 -- Checks if a mage is eligible to combustion next
