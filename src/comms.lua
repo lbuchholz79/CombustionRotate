@@ -18,6 +18,7 @@ function CombRotate.OnCommReceived(prefix, data, channel, sender)
     if not UnitIsUnit('player', sender) then
 
         local success, message = AceSerializer:Deserialize(data)
+        CombRotate:debug("receivedAddonMessage " .. message)
 
         if (success) then
             if (message.type == CombRotate.constants.commsTypes.combDone) then
@@ -56,6 +57,7 @@ end
 
 -- Broadcast a given message to the commsChannel with the commsPrefix
 function CombRotate:sendAddonMessage(message, channel, name)
+    CombRotate:debug("sendAddonMessage " .. message)
     AceComm:SendCommMessage(
         CombRotate.constants.commsPrefix,
         AceSerializer:Serialize(message),

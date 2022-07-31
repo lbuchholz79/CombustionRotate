@@ -1,5 +1,5 @@
-local combustion = GetSpellInfo(11129)
-local testingSpell = GetSpellInfo(2136)
+local combustion = GetSpellInfo(CombRotate.constants.spellId)
+local testingSpell = GetSpellInfo(CombRotate.constants.testingSpellId)
 local playerGUID = UnitGUID("player")
 
 local eventFrame = CreateFrame("Frame")
@@ -45,8 +45,10 @@ function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
 
     if (spellName == combustion or (CombRotate.testMode and spellName == testingSpell)) then
         local sourceMage = CombRotate:getMage(sourceGUID)
+        CombRotate:debug("Combustion detected from mage: " .. sourceMage .. " on target " .. destGUID)
         if (sourceMage) then
             if (event == "SPELL_CAST_SUCCESS") then
+                CombRotate:debug("Combustion successful")
                 CombRotate:sendSyncComb(sourceMage, false, timestamp)
                 CombRotate:rotate(sourceMage)
                 if (sourceGUID == playerGUID) then
@@ -58,11 +60,13 @@ function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
                     )
                 end
             elseif (event == "SPELL_MISSED") then
+                CombRotate:debug("Combustion failed")
                 CombRotate:sendSyncComb(sourceMage, true, timestamp, event)
+                CombRotate:handleFailComb(sourceMage, event)
                 if (sourceGUID == playerGUID) then
                     CombRotate:sendAnnounceMessage(
                             CombRotate:getCombFailMessage(
-                                    CombRotate:isBossFireImmune(destGUID),
+                                    CombRotate:isTargetFireImmune(destGUID),
                                     destName,
                                     destRaidFlags
                             )
@@ -70,6 +74,14 @@ function CombRotate:COMBAT_LOG_EVENT_UNFILTERED()
                 end
             end
         end
+    elseif (event == "UNIT_DIED" and sourceGUID ~= UnitGUID("player") and not InCombatLockdown()) then
+        CombRotate:debug("Target died")
+        CombRotate:updateRaidStatus()
+        if (CombRotate:isPlayerAllowedToManageRotation()) then
+            CombRotate:endEncounter()
+        end
+    else
+        CombRotate:debug("event happened: " .. event .. ", sourceGUID: " .. sourceGUID .. ", targetGUID: " .. destGUID)
     end
 end
 
@@ -85,14 +97,13 @@ end
 
 -- Player left combat
 function CombRotate:ENCOUNTER_END()
-    CombRotate:resetRotation()
-    CombRotate:sendResetBroadcast()
+    CombRotate:endEncounter()
 end
 
 function CombRotate:PLAYER_TARGET_CHANGED()
-    if (CombRotate.db.profile.showWindowWhenTargetingBoss) then
-        if (not CombRotate:isBossFireImmune(UnitGUID("target")) and not UnitIsDead("target")) then
-            CombRotate.mainFrame:Show()
+    if (CombRotate.db.profile.hideOnFireImmuneTarget) then
+        if (CombRotate:isTargetFireImmune(UnitGUID("target")) and not UnitIsDead("target")) then
+            CombRotate.mainFrame:Hide()
         end
     end
 end

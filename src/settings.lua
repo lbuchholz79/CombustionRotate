@@ -67,9 +67,9 @@ function CombRotate:CreateConfig()
                         order = 9,
                         width = "full",
                     },
-                    showWindowWhenTargetingBoss = {
-                        name = L["SHOW_WHEN_TARGETING_BOSS"],
-                        desc = L["SHOW_WHEN_TARGETING_BOSS_DESC"],
+                    hideOnFireImmuneTarget = {
+                        name = L["HIDE_ON_FIRE_IMMUNE_TARGET"],
+                        desc = L["HIDE_ON_FIRE_IMMUNE_TARGET_DESC"],
                         type = "toggle",
                         order = 10,
                         width = "full",

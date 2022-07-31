@@ -25,8 +25,8 @@ local L = {
     ["HIDE_WINDOW_NOT_IN_RAID_DESC"] = "Hide the window when not in a raid",
     ["DO_NOT_SHOW_WHEN_JOINING_RAID"] = "Do not show window when joining a raid",
     ["DO_NOT_SHOW_WHEN_JOINING_RAID_DESC"] = "Check this if you don't want the window to show up each time you join a raid",
-    ["SHOW_WHEN_TARGETING_BOSS"] = "Show window when you target a non fire-immune boss",
-    ["SHOW_WHEN_TARGETING_BOSS_DESC"] = "Show window when you target a non fire-immune boss",
+    ["HIDE_ON_FIRE_IMMUNE_TARGET"] = "Hide window when you target a fire-immune boss",
+    ["HIDE_ON_FIRE_IMMUNE_TARGET_DESC"] = "Hide window when you target a fire-immune boss",
     ["WINDOW_LOCKED"] = "CombuistionRotate: Window locked",
     ["WINDOW_UNLOCKED"] = "CombustionRotate: Window unlocked",
 

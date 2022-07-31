@@ -75,6 +75,51 @@ function CombRotate:rotate(lastMage, rotateWithoutCooldown)
     end
 end
 
+-- Handle miss or dispel resist scenario
+function CombRotate:handleFailComb(mage, event)
+
+    -- Do not process multiple SPELL_DISPEL_FAILED events or multiple fail broadcasts
+    local duplicate = mage.lastFailTime >= GetTime() - CombRotate.constants.duplicateCombustionDelayThreshold
+    if (duplicate) then
+        return
+    end
+
+    CombRotate:printFail(mage, event)
+
+    local playerName, realm = UnitName("player")
+    local hasPlayerFailed = playerName == mage.name
+    local nextMage = CombRotate:getHighlightedMage()
+    local lastMageRotationTable = CombRotate:getMageRotationTable(mage)
+
+    -- Could happen if the first event received is a miss/resist
+    if (nextMage == nil) then
+        nextMage = CombRotate:getNextRotationMage(mage)
+    end
+
+    mage.lastFailTime = GetTime()
+
+    -- No backup, if player is next in rotation he will be warned to handle the fail
+    if (
+            lastMageRotationTable == CombRotate.rotationTables.rotation and
+                    nextMage.name == playerName and
+                    #CombRotate.rotationTables.backup < 1 and
+                    CombRotate:isMageCombustionCooldownReady(nextMage)
+    ) then
+        CombRotate:throwCombAlert()
+    end
+
+    -- The player failed, sending fail message and backup alerts
+    if (hasPlayerFailed) then
+        CombRotate:alertBackup(CombRotate.db.profile.whisperFailMessage, nextMage, true)
+    end
+
+    -- Player is in backup group, display an alert when someone fails
+    local playerRotationTable = CombRotate:getMageRotationTable(CombRotate:getMage(playerName))
+    if (playerRotationTable == CombRotate.rotationTables.backup and not hasPlayerFailed) then
+        CombRotate:throwCombAlert()
+    end
+end
+
 -- Removes all nextComb flags and set it true for next caster
 function CombRotate:setNextComb(nextMage)
     for key, mage in pairs(CombRotate.rotationTables.rotation) do
@@ -448,6 +493,26 @@ function CombRotate:alertBackup(message, nextMage, noComms)
                 CombRotate:sendBackupRequest(nextMage.name)
             end
         end
+    else
+        CombRotate:whisperBackup(message, noComms)
+    end
+end
+
+-- Whisper provided message of fail message to all backup except player
+function CombRotate:whisperBackup(message, noComms)
+
+    if (message == nil) then
+        message = CombRotate.db.profile.whisperFailMessage
+    end
+
+    for key, backupMage in pairs(CombRotate.rotationTables.backup) do
+        if (backupMage.name ~= UnitName("player")) then
+            SendChatMessage(message, 'WHISPER', nil, backupMage.name)
+
+            if (noComms ~= true) then
+                CombRotate:sendBackupRequest(backupMage.name)
+            end
+        end
     end
 end
 
@@ -492,9 +557,14 @@ end
 function CombRotate:handleResetButton()
     CombRotate:updateRaidStatus()
     if (CombRotate:isPlayerAllowedToManageRotation()) then
-        CombRotate:resetRotation()
-        CombRotate:sendResetBroadcast()
+        CombRotate:endEncounter()
     else
         CombRotate:printPrefixedMessage(L["RESET_UNAUTHORIZED"])
     end
+end
+
+-- Player left combat
+function CombRotate:endEncounter()
+    CombRotate:resetRotation()
+    CombRotate:sendResetBroadcast()
 end

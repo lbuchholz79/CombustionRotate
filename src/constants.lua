@@ -11,7 +11,10 @@ CombRotate.colors = {
 
 CombRotate.constants = {
     ['className'] = 'MAGE',
+    ['spellId'] = 11129,        -- Combustion
+    ['testingSpellId'] = 2136,  -- Fire Blast (Rank 1)
     ['cooldownTime'] = 180,
+    ['cooldownTimeTest'] = 8,
     ['mageFrameHeight'] = 22,
     ['mageFrameSpacing'] = 4,
     ['titleBarHeight'] = 18,
@@ -51,7 +54,7 @@ CombRotate.constants = {
         ['flagtaken'] = 'Flag Taken (DBM)',
     },
 
-    ['bosses'] = {
+    ['fireImmuneTargets'] = {
         9017,  -- Lord Incendius
         11668, -- Firelord
         11666, -- Firewalker

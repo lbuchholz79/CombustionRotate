@@ -12,7 +12,11 @@ end
 
 -- Checks if a mage is alive
 function CombRotate:isMageAlive(mage)
-    return UnitIsFeignDeath(mage.name) or not UnitIsDeadOrGhost(mage.name)
+    return UnitIsFeignDeath(mage.name) or not CombRotate:isUnitDead(mage.name)
+end
+
+function CombRotate:isUnitDead(name)
+    return UnitIsDeadOrGhost(name)
 end
 
 -- Checks if a mage is offline
@@ -33,7 +37,7 @@ end
 -- Get cooldown of combustion or testing delay
 function CombRotate:getCooldownTime()
     if (CombRotate.testMode) then
-        return 10
+        return CombRotate.constants.cooldownTimeTest
     else
         return CombRotate.constants.cooldownTime
     end
@@ -41,8 +45,7 @@ end
 
 -- Checks if a mage is eligible to combustion next
 function CombRotate:isEligibleForNextComb(mage)
-    local isCooldownShortEnough = mage.lastCombTime <= GetTime() - CombRotate.constants.cooldownTime
-    return CombRotate:isMageAliveAndOnline(mage) and isCooldownShortEnough
+    return CombRotate:isMageAliveAndOnline(mage) and CombRotate:isMageCombustionCooldownReady(mage)
 end
 
 -- Checks if a mage is in a battleground
@@ -65,13 +68,13 @@ function CombRotate:getIdFromGuid(guid)
 end
 
 -- Checks if the mob is a fire immune boss
-function CombRotate:isBossFireImmune(guid)
+function CombRotate:isTargetFireImmune(guid)
 
-    local bosses = CombRotate.constants.bosses
+    local immunes = CombRotate.constants.fireImmuneTargets
     local type, mobId = CombRotate:getIdFromGuid(guid)
 
     if (type == "Creature") then
-        for i, bossId in ipairs(bosses) do
+        for i, bossId in ipairs(immunes) do
             if (bossId == mobId) then
                 return true
             end

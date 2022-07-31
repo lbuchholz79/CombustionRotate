@@ -18,7 +18,7 @@ function CombRotate:LoadDefaults()
 			enableCombNowSound = true,
 			combNowSound = 'alarm1',
 			doNotShowWindowOnRaidJoin = false,
-			showWindowWhenTargetingBoss = false,
+			hideOnFireImmuneTarget = true,
 			enableIncapacitatedBackupAlert = true,
 			incapacitatedDelay = 2,
 			timedBackupAlertDelay = 3,
